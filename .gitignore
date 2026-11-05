@@ -17,3 +17,6 @@ outputs/
 .llm_cache/
 *.safetensors
 *.gguf
+
+# DDP thesis archive (moved into prior_work/), never committed
+prior_work/ddp

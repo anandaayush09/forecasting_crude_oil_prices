@@ -11,3 +11,12 @@ Setup (Python 3.12):
     pytest tests -q
 
 Protocol freeze: tag `protocol-frozen` (week 6). Test-split access is gated on it.
+
+## Prior work
+
+The earlier DDP thesis (WTI at 1/7/90/180 days) is archived and linked from `prior_work/`:
+- `prior_work/README.md`: map of the archive, canonical files and caveats
+- `prior_work/DDP_KNOWLEDGE_BASE.md`: what was done, results, pitfalls, reusable pieces
+- `prior_work/ddp/`: the full DDP archive itself (gitignored; `C:\Users\anand\Documents\DDP1` now links here)
+
+This project starts fresh; the old work is reference only.

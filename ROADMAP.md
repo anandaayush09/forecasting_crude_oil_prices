@@ -24,6 +24,18 @@ The project folder is empty, so everything starts from scratch.
 
 ---
 
+## 0. Prior work (DDP thesis) and how this project builds on it
+
+The earlier DDP thesis (WTI at 1/7/90/180 days, Track A "leaky paper reproduction" vs Track B "honest walk-forward") is archived at `prior_work/ddp` (moved into this folder; the old `C:\Users\anand\Documents\DDP1` path is a link to it). A summary with reusable pieces and pitfalls is in `prior_work/DDP_KNOWLEDGE_BASE.md`. This project starts fresh; nothing is copied into `src/` unless you decide to port it.
+
+- **RQ2 head start:** DDP already contains a leaky-vs-honest comparison (Track A vs B) and causal rolling-VMD code. Its leakage premium was planned but never reported, and Track B itself still leaks (no purge gap, full-series winsorization and HMM regimes). This project must do the audit properly and report the premium.
+- **Internal baseline row:** DDP Track B results (naive, Informer, TFT, PatchTST, etc.) become a reference row in the benchmark tables, labelled as produced under the old protocol.
+- **Horizons:** DDP used 1/7/90/180 calendar days. Report those in an appendix for continuity with the thesis.
+- **Motivation for new signals:** the thesis concludes that long horizons lack information, not model capacity. That motivates the term structure, fundamentals and agentic news signals here.
+- **Do not repeat:** captions that call a 70/30 split "walk-forward"; audit scripts that check files but not leakage; empty Diebold-Mariano tables; unverified citations; models that silently collapse to the naive forecast.
+
+---
+
 ## 1. Research questions and contributions
 
 | RQ | Question | Contribution |
