@@ -1,0 +1,24 @@
+# Runs automatically on `git commit` after you run `pre-commit install` once.
+# The same checks run in CI (.github/workflows/ci.yml), so a commit that passes here passes there.
+# Files this project does not own or lint: the old DDP-era note at the repo root and the DDP archive.
+exclude: ^(ddp_report_improvements\.md|prior_work/)
+
+repos:
+  # Fast linter + formatter (replaces flake8, isort and black). `rev` pins the hook version.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3
+    hooks:
+      - id: ruff-check      # lint; --fix applies safe fixes automatically
+        args: [--fix]
+      - id: ruff-format     # format code
+
+  # Small generic safety checks.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml                      # catches broken YAML (configs, CI) before it is committed
+      - id: check-added-large-files         # blocks accidental commits of data/model files
+        args: [--maxkb=1000]
+      - id: detect-private-key              # blocks committed private keys

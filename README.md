@@ -12,6 +12,20 @@ Setup (Python 3.12):
 
 Protocol freeze: tag `protocol-frozen` (week 6). Test-split access is gated on it.
 
+## Dev workflow
+
+    make lint            # ruff check + format check (same as CI)
+    make fmt             # auto-fix and format
+    make test            # pytest
+    pre-commit install   # once: run the checks automatically on every commit
+
+`make` is not installed on Windows by default; run the commands inside the Makefile directly (e.g. `python -m ruff check .`).
+Unfinished task cards live in `docs/tasks/`; their tests show as `XFAIL` until you implement them.
+
+## Engineering plan
+
+`docs/ENGINEERING_ROADMAP.md` (proposed): how AI-engineering concepts, a FastAPI backend and a React UI fit around the research, plus the ownership protocol.
+
 ## Prior work
 
 The earlier DDP thesis (WTI at 1/7/90/180 days) is archived and linked from `prior_work/`:

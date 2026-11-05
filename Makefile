@@ -1,5 +1,5 @@
 # Placeholder targets; filled in as each phase lands.
-.PHONY: test data baselines dl agents live
+.PHONY: test lint fmt data baselines dl agents live
 test:
 	python -m pytest tests -q
 data:
@@ -12,3 +12,8 @@ agents:
 	@echo "TODO Phase 4b: python experiments/run_agents.py"
 live:
 	@echo "TODO: daily live forward test (frozen v1)"
+
+lint:
+	@python -m ruff check . && python -m ruff format --check .
+fmt:
+	@python -m ruff check --fix . && python -m ruff format .

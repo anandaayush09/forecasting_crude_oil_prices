@@ -1,0 +1,29 @@
+# Tooling configuration only. The project is not packaged yet; code is imported from src/ via pytest's pythonpath
+# (and PYTHONPATH=src in the Makefile). Packaging (a [project] table) can be added when the API/worker need it.
+
+[tool.ruff]
+# Target the Python version we develop and run CI on, so ruff knows which syntax is valid.
+target-version = "py312"
+# Keep lines readable on a laptop screen; `ruff format` enforces this, so E501 is switched off below.
+line-length = 100
+# Never lint or format these: the DDP archive is old code we do not own, data/results are generated files.
+extend-exclude = ["prior_work", "corpus", "data", "results", "web/node_modules"]
+
+[tool.ruff.lint]
+# E/F = pycodestyle + pyflakes (real errors), I = import sorting, UP = modernise syntax, B = bug-prone patterns.
+select = ["E", "F", "I", "UP", "B"]
+# E501 (line too long) is handled by the formatter, so linting it as well would only produce noise.
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+# Treat `oilfc` as our own package so its imports are grouped separately from third-party libraries.
+known-first-party = ["oilfc", "oilfc_api"]
+
+[tool.pytest.ini_options]
+# Same as the old pytest.ini: make `import oilfc` work without installing the package.
+pythonpath = ["src"]
+testpaths = ["tests"]
+# -ra prints a short summary of skipped / xfailed tests, so the unfinished task cards stay visible.
+addopts = "-ra"
+# Task-card tests are marked xfail until you implement them; a test that unexpectedly passes is reported, not failed.
+xfail_strict = false

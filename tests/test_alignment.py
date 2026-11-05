@@ -13,7 +13,7 @@ def test_release_alignment_monthly_lag():
     # CPI-style: dated 1st of month, usable 45 days later (Jan -> Feb 15, Feb -> Mar 17).
     targets = pd.to_datetime(["2020-02-10", "2020-02-15", "2020-03-16", "2020-03-17"])
     a = align_asof(_monthly(), targets, "days", 45)
-    assert a["value"].isna().iloc[0]            # nothing released yet
+    assert a["value"].isna().iloc[0]  # nothing released yet
     assert a["value"].tolist()[1:] == [1.0, 1.0, 2.0]
     assert a["obs_date"].iloc[3] == pd.Timestamp("2020-02-01")
     assert a["release_age_days"].iloc[3] == 0
@@ -36,7 +36,7 @@ def test_no_future_rows_perturbing_unreleased_values_changes_nothing():
     t = pd.Timestamp("2018-09-03")
     base = align_asof(s, pd.DatetimeIndex([t]), "bdays", 5)["value"].iloc[0]
     s2 = s.copy()
-    s2[s2.index > t - pd.offsets.BDay(5)] = 1e9   # only values not yet available at t
+    s2[s2.index > t - pd.offsets.BDay(5)] = 1e9  # only values not yet available at t
     assert align_asof(s2, pd.DatetimeIndex([t]), "bdays", 5)["value"].iloc[0] == base
 
 
