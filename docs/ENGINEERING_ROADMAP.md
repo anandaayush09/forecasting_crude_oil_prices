@@ -14,6 +14,15 @@ Your choices:
 
 This project replaces the generic portfolio projects in that roadmap. Each concept is learned by building the piece of *this* project that needs it.
 
+## Free-tier policy
+
+Everything here must be free: permanent free tier, no credit card, available on the open web. The full register (limits, fallbacks, what is not used) is [FREE_RESOURCES.md](FREE_RESOURCES.md). Consequences for this plan:
+- LLMs: open-weight models on Kaggle/Colab for backtests; a free-tier API through LiteLLM (with failover) only for the live test. No Claude/OpenAI API in the project.
+- Tracing: self-hosted Langfuse only (no LangSmith). Error tracking: local JSON logs (no Sentry).
+- Public demo: a static React build with exported JSON on GitHub Pages or Cloudflare Pages. The live Agent console is shown as replayed recorded runs; the full app runs locally with Docker Compose.
+- CI/CD: GitHub Actions and GHCR on a public repository.
+- Kubernetes, MongoDB and Celery stay out of scope.
+
 Where things stand (week 3 of 26, 5 Nov 2026): the data layer works (`src/oilfc/data/`, 7 tests pass); everything else is a stub; two commits, no remote, no CI.
 
 ## 1. Target architecture
@@ -28,10 +37,10 @@ Where things stand (week 3 of 26, 5 Nov 2026): the data layer works (`src/oilfc/
         +----------------------------------------------------------------------------------------------+
               |                       |                              |
         Postgres + pgvector      Redis (API cache,           mcp_server/ (as_of-enforced tools)
-        runs, forecasts, metrics  job queue)                 <-- OilAgent (LangGraph) / Claude Desktop
+        runs, forecasts, metrics  job queue)                 <-- OilAgent (LangGraph) / any MCP client
         documents + embeddings, LLM call cache, agent traces, live-test log
               ^
-        worker (scheduled: data refresh, backtests, daily live forecast)    Langfuse tracing, Sentry errors
+        worker (scheduled: data refresh, backtests, daily live forecast)    Langfuse tracing (self-hosted), local JSON logs
 ```
 
 Principles (your first ADRs):
@@ -54,7 +63,7 @@ Principles (your first ADRs):
 | Redis | Response cache and job queue | Fast UI |
 | Background jobs | Worker for data refresh, backtests, the daily live forecast | The live forward test runs itself |
 | Tokens, cost, prompting, structured output | Event-extraction prompts with a Pydantic output schema; harness scored on 200 hand-labelled headlines | M1 quality is measured, not judged by eye |
-| Multi-provider routing (LiteLLM) | Open-weight vLLM for backtests, Claude API for the live test | The cost plan in ROADMAP section 4.4 |
+| Multi-provider routing (LiteLLM) | Open-weight vLLM on free GPUs for backtests; free-tier Gemini/Groq (failover) for the live test | The cost plan in ROADMAP section 4.4 |
 | Embeddings, chunking, vector DB, hybrid search, reranking | Point-in-time news RAG on pgvector + BM25 (reciprocal rank fusion), filtered by `as_of` | The Curator agent |
 | RAG evaluation | Retrieval recall@k on labelled events; an "as-of violation = 0" test | Leakage-controlled retrieval |
 | ReAct by hand, then LangGraph | `agents/react_min.py` first, then the `agents/graph.py` OilAgent | M2/M3 agent modes |
@@ -62,11 +71,11 @@ Principles (your first ADRs):
 | Memory | Memory of resolved past forecasts only | Reflection without look-ahead |
 | HITL | `interrupt()` before a live-test forecast is published; approve in the UI | Audit trail for the live test |
 | AI system design | `docs/architecture.md`; cost per forecast for M1-M4 | Agent cost section of the workshop paper |
-| Tracing, prompt versioning, cost monitoring | Langfuse (self-hosted in compose) or LangSmith free tier; prompts versioned in git | Rationale-faithfulness audit |
+| Tracing, prompt versioning, cost monitoring | Langfuse (self-hosted in compose, MIT licence); prompts versioned in git | Rationale-faithfulness audit |
 | Eval in CI | GitHub Actions gates: ruff, pytest leakage suite, extraction-eval threshold, frozen mini-backtest regression | Protocol stays frozen |
 | Docker (multi-stage, non-root), Compose | `docker/`, `compose.yaml` | Reproducibility package for reviewers |
-| CI/CD, GHCR, staged deploy, health checks, rollback | Commit-SHA images; staging, then production with manual approval, for the demo | Public demo link |
-| Sentry, structured logs | API and worker | Live-test reliability |
+| CI/CD, GHCR, staged deploy, health checks, rollback | Commit-SHA images on GHCR; static demo deployed to GitHub Pages or Cloudflare Pages, production gated by a manual approval on a GitHub environment | Public demo link |
+| Structured logs | API and worker (JSON logs, no paid error tracker) | Live-test reliability |
 
 Optional, only after submission: Kubernetes, MongoDB, Celery. Postgres JSONB plus a simple worker cover the same needs; explaining that choice is an ADR in itself.
 
@@ -108,8 +117,8 @@ Learning artifacts that you write and I review:
 | 5-9 | E1 Store, API, UI shell | Compose (Postgres + pgvector, Redis); results schema and writer; FastAPI read endpoints and `/health`; OpenAPI to TS types; React shell with Data and Benchmarks pages | Phase 2 baselines; protocol freeze in week 6 |
 | 9-13 | E2 LLM and RAG | Corpus ingest, chunk, embed, hybrid `as_of` retrieval, rerank; extraction prompts and harness; LiteLLM routing; cost logging; LLM cache; injection guard; Events page | Phase 3 and 4b (M1) |
 | 12-17 | E3 Agents | MCP server; hand-built ReAct loop, then LangGraph OilAgent; resolved-forecast memory; HITL interrupt; Langfuse tracing; SSE Agent console; Live page; worker runs the daily live forecast | 4b M2/M3; live test from week 12 |
-| 17-21 | E4 LLMOps hardening | CI eval gates; prompt versioning; multi-stage non-root images; Sentry; pip-audit; Forecasts page; full Benchmarks page | Final evaluation |
-| 21-26 | E5 Ship and document | GHCR commit-SHA images; staging then production with manual approval; read-only public demo; README with architecture, decisions, what broke, rollback | Writing and submission |
+| 17-21 | E4 LLMOps hardening | CI eval gates; prompt versioning; multi-stage non-root images; pip-audit; Forecasts page; full Benchmarks page | Final evaluation |
+| 21-26 | E5 Ship and document | GHCR commit-SHA images; static read-only demo on GitHub Pages/Cloudflare Pages (replayed agent runs, exported results) with manual approval for production; README with architecture, decisions, what broke, rollback | Writing and submission |
 
 If research slips, E4 and E5 shrink to Docker plus README. E0-E3 stay, because they are research infrastructure.
 

@@ -22,4 +22,13 @@ If you are stuck for more than 30 minutes, paste the error and what you tried. I
 | [E0-2](E0-2_settings.md) | Validated settings from the YAML configs | Pydantic models, `pydantic-settings`, failing fast |
 | [E0-3](E0-3_structured_logging.md) | JSON logging and a `@timed` decorator | decorators, `structlog`, observability |
 
-Also in E0: write `docs/adr/0001-research-core-has-no-web-dependencies.md` yourself.
+| [V1](V1_volatility_targets.md) | Forward and past realised-volatility targets | rolling windows, causality, annualisation |
+| [V2](V2_losses.md) | QLIKE, log-vol MSE, normal CRPS | proper scoring rules, robust volatility losses |
+| [V3](V3_dm_test.md) | Diebold-Mariano test (HLN form) | hypothesis tests, HAC variance, overlapping forecasts |
+| [V4](V4_protocol_review.md) | Review and freeze `configs/protocol.yaml` | pre-registration, leakage by design |
+| [V5](V5_rolling_splits.md) | Expanding-origin splits with a gap | walk-forward evaluation, purging |
+| [V6](V6_vol_baselines.md) | Volatility ladder: naive, EWMA, HAR, OVX, HAR + OVX | log-linear forecasting, reproducing a result |
+
+Suggested order: V1, V2, V3, V5, V6 (V4 in parallel this week). V6's last test needs V1, V2, V3 and V5.
+
+Also in E0: write `docs/adr/0001-research-core-has-no-web-dependencies.md` yourself. For the volatility pivot, write `docs/adr/0002-volatility-as-main-target.md`.

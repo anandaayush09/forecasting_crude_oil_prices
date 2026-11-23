@@ -5,11 +5,12 @@
 The goal is publication-level work that beats existing benchmarks for crude oil price forecasting across horizons.
 
 **Your choices:**
-- Venues: a Q1 forecasting/energy journal **and** an ML workshop.
+- Venues: a Q1 forecasting/energy journal **and** an ML workshop, with no publication fees (subscription route, arXiv/SSRN preprints, free workshop submission).
 - Horizons: daily (1–66 trading days) and monthly (1–24 months).
 - Timeline and compute: about 6 months (week 1 = 19 Oct 2026, ending mid-Apr 2027) on a single GPU (Colab/Kaggle).
 - Agentic AI plays two roles: (a) **a forecasting component**, the main focus of the workshop paper and one evaluated module in the journal paper, and (b) **research infrastructure**, which supports the work but is not claimed as a contribution.
-- LLMs: open-weight models plus a small API budget.
+- **Cost constraint: everything is free-tier.** No paid APIs, no paid data, no paywalled-only papers, no card required. The register of every resource, its limit and its fallback is `docs/FREE_RESOURCES.md`.
+- LLMs: open-weight models on free Kaggle/Colab GPUs for all backtests; a free-tier API (Gemini or Groq via LiteLLM, with failover) only for the live test.
 
 The project folder is empty, so everything starts from scratch.
 
@@ -22,6 +23,12 @@ The project folder is empty, so everything starts from scratch.
 
 **Being honest about "beating benchmarks":** daily 1–5 day MSPE gains over the random walk will be tiny. The realistic wins are at monthly 1–6 month horizons, in high-volatility regimes, in directional accuracy and in probabilistic accuracy (CRPS and calibration). Gains are claimed only where formal tests support them.
 
+**Update 2026-11-23 (week 6): the main claim moves to volatility and risk.** The DDP re-run showed that its apparent 7-day price gain (26%) came from look-ahead features and falls to 0.2-0.6% (not significant) without them. An audit of the archive found no honest DDP price model that beats the naive forecast. A quick read-only check, still to be reproduced in project code, found a real edge elsewhere: the OVX implied-volatility index forecasts 21-day realised Brent volatility about 33% better than the naive forecast and about 24% better than the standard HAR model (Diebold-Mariano p < 0.001, 2012-2026). So:
+- The **headline claim** is leakage-free volatility, risk (VaR/ES) and density forecasting. Deep, transformer and AR-MoE models predict a shrunk residual on top of the HAR + OVX anchor.
+- **Price point forecasts** are reported at every horizon as the secondary result. A null is acceptable and is stated as one.
+- The **leakage audit** (DDP 26% to 0.2%) is a paper section.
+Decision record: `docs/adr/0002-volatility-as-main-target.md`. Task cards: `docs/tasks/V1-V6_*.md`.
+
 ---
 
 ## 0. Prior work (DDP thesis) and how this project builds on it
@@ -29,6 +36,7 @@ The project folder is empty, so everything starts from scratch.
 The earlier DDP thesis (WTI at 1/7/90/180 days, Track A "leaky paper reproduction" vs Track B "honest walk-forward") is archived at `prior_work/ddp` (moved into this folder; the old `C:\Users\anand\Documents\DDP1` path is a link to it). A summary with reusable pieces and pitfalls is in `prior_work/DDP_KNOWLEDGE_BASE.md`. This project starts fresh; nothing is copied into `src/` unless you decide to port it.
 
 - **RQ2 head start:** DDP already contains a leaky-vs-honest comparison (Track A vs B) and causal rolling-VMD code. Its leakage premium was planned but never reported, and Track B itself still leaks (no purge gap, full-series winsorization and HMM regimes). This project must do the audit properly and report the premium.
+- **Re-run result (2026-11-23):** removing the three whole-series VMD columns from the 7-day feature set turned Informer / TCN-BiLSTM / TCN gains of 27.0 / 26.0 / 24.7% into 0.2 / 0.4 / 0.6% (Diebold-Mariano p 0.65 / 0.32 / 0.19) and direction accuracy from 72-75% to about 50%. Evidence: `prior_work/ddp/resume-numbers-justification.md`, `prior_work/ddp/rerun/`. The DDP 90d and 180d "wins" used the same columns and are unverified.
 - **Internal baseline row:** DDP Track B results (naive, Informer, TFT, PatchTST, etc.) become a reference row in the benchmark tables, labelled as produced under the old protocol.
 - **Horizons:** DDP used 1/7/90/180 calendar days. Report those in an appendix for continuity with the thesis.
 - **Motivation for new signals:** the thesis concludes that long horizons lack information, not model capacity. That motivates the term structure, fundamentals and agentic news signals here.
@@ -40,20 +48,20 @@ The earlier DDP thesis (WTI at 1/7/90/180 days, Track A "leaky paper reproductio
 
 | RQ | Question | Contribution |
 |---|---|---|
-| RQ1 | Under a leakage-free, rolling-origin protocol, do DL models, transformers and TSFMs beat the no-change and futures benchmarks, and at which horizons? | Rigorous multi-horizon benchmark (daily + monthly) |
-| RQ2 | How much of the reported gain of decomposition hybrids comes from leakage? | Literature audit plus a leaky-vs-causal experiment |
-| RQ3 | Does an anchor-residual, regime-routed transformer give significant statistical and economic gains? | **AR-MoE Transformer** (§2) |
-| RQ4 | For oil, does attention (temporal and exogenous) add value over attention-free backbones of equal capacity? | Controlled transformer study that answers the DLinear critique (§3) |
-| RQ5 | Does an agentic LLM layer that reads point-in-time news and reports add value beyond the quantitative model, and how much of its apparent value is LLM look-ahead bias? | **OilAgent** plus a leakage-controlled agent evaluation and a live forward test (§4) |
-| RQ6 | Do the probabilistic forecasts stay calibrated through breaks, and which information drives gains at each horizon? | Online conformal calibration; horizon-resolved interpretability |
+| RQ1 | **(reframed)** Under a leakage-free, rolling-origin protocol, which forecasts of Brent realised volatility (5, 22 and 66 trading days) beat the naive, GARCH and HAR benchmarks, and does anything beat HAR + OVX? Price forecasts vs the no-change benchmark are the secondary result | Rigorous volatility benchmark plus a price-forecast null or gain, with formal tests |
+| RQ2 | How much of the reported gain of decomposition hybrids comes from leakage? | Literature audit, the DDP case study (26% to 0.2%) and automated leak tests |
+| RQ3 | **(reframed)** Does AR-MoE, a regime-gated, shrunk residual on the HAR + OVX anchor, add significant gains, mainly in high-volatility regimes? | **AR-MoE Transformer** (§2) |
+| RQ4 | For oil, does attention (temporal and exogenous) add value over attention-free backbones of equal capacity, on the residual task? | Controlled transformer study that answers the DLinear critique (§3) |
+| RQ5 | **(narrowed)** Does point-in-time event intensity (news, OPEC, geopolitical risk) improve volatility forecasts around events, and how much of an LLM's apparent value is look-ahead bias? | **OilAgent** M1 first; M2-M4 only if time allows (§4) |
+| RQ6 | **(reframed)** Are 1- and 10-day VaR and Expected Shortfall, and 22-day densities, calibrated through breaks, and better than RW + GARCH-t? | Calibrated risk forecasts; online conformal calibration |
 
-**Pre-registered success criteria:**
-- MSPE ratio < 1 against the random walk with Clark–West p < 0.05 at ≥ 3 horizons.
-- In the 90% Model Confidence Set at most horizons.
-- Multi-horizon SPA rejection.
-- CRPS better than a RW+GARCH-t density.
-- Significant Pesaran–Timmermann directional accuracy.
-- Positive certainty-equivalent return after costs.
+**Pre-registered success criteria (revised 2026-11-23, before the week-6 freeze):**
+- **Volatility, expected (preliminary evidence exists):** QLIKE and MSE(log vol) ratios below 1 against naive, GARCH-t and HAR, with Diebold-Mariano (HLN) p < 0.05 at 2 or more of the 3 horizons.
+- **Volatility, stretch (the deep-learning claim):** a residual model inside the 90% Model Confidence Set on QLIKE at 2 or more horizons, and beating HAR + OVX with p < 0.05 at 1 or more horizon, or in the top-volatility tercile.
+- **Risk:** 1% and 5% VaR pass Kupiec and Christoffersen; Expected Shortfall passes its backtest; FZ0 joint loss below GARCH-t and historical simulation.
+- **Density:** CRPS better than a RW + GARCH-t density.
+- **Price:** MSPE ratio vs no-change reported at all horizons with Clark-West tests; a null result is stated as one.
+- **Dropped as headline criteria:** multi-horizon SPA, Pesaran-Timmermann direction and certainty-equivalent return become secondary price-forecast checks.
 
 **Priorities (MoSCoW), to protect the 6-month window:**
 - **Must:** benchmark, leakage audit, AR-MoE Transformer, the transformer study, and LLM event features as covariates (agent mode M1).
@@ -64,6 +72,8 @@ The earlier DDP thesis (WTI at 1/7/90/180 days, Track A "leaky paper reproductio
 ---
 
 ## 2. Proposed model: AR-MoE Transformer (Anchor-Residual, Regime-routed Mixture-of-Experts)
+
+**Update 2026-11-23:** for the headline volatility task the anchor is **HAR + OVX** (not the no-change price forecast), and the model predicts a shrunk log-volatility residual; for the secondary price task the anchor stays no-change or futures-implied.
 
 The design principle is that the random walk is hard to beat, so the model **learns a state-dependent correction on top of a strong anchor**. Its backbone is an exogenous-aware patch transformer derived from TimeXer.
 
@@ -176,7 +186,7 @@ The design principle is that the random walk is hard to beat, so the model **lea
 ### 4.4 Models and costs
 
 - **Extraction (M1):** a 7–9B open-weight instruct model (e.g., Qwen3-8B / Llama-3.1-8B), 4-bit, served with vLLM on Colab. GDELT 2.0 runs from 2015, giving about 4,000 daily prompts (top-N oil-relevant headlines per day plus EIA/OPEC documents), which is feasible.
-- **Adjudicator/critic:** the open-weight model for clean historical windows; a small API budget (Claude) for the live test (~60 days × a few calls/day, low cost).
+- **Adjudicator/critic:** the open-weight model for clean historical windows; a free-tier API (Gemini or Groq via LiteLLM, with failover, exact model id logged) for the live test (~60 days × a few calls/day, low cost).
 - **Comparators:** TimeCopilot (open source) run as an off-the-shelf agentic baseline; TemporalBench (2602.13272) as a reference evaluation design.
 
 ### 4.5 Agent-specific evaluation
@@ -201,7 +211,7 @@ The design principle is that the random walk is hard to beat, so the model **lea
 | Live-test operator | Daily scheduled job: pull data, run frozen v1, commit forecast hash before the close | Append-only log |
 | Reporting | Builds tables and figures *only from result files*; no hand-typed numbers | Figures regenerated in CI |
 
-- **Test-set lock:** test-split access is gated on a `protocol-frozen` git tag. A Claude Code PreToolUse hook blocks commands that touch test data before the tag exists. Protocol changes need human sign-off.
+- **Test-set lock:** test-split access is gated on a `protocol-frozen` git tag. A guard in the evaluation code (covered by a pytest test and CI) refuses to load the test split unless that tag exists. Protocol changes need human sign-off.
 - **Leakage test suite (pytest):**
   - `test_no_future_rows`
   - `test_scaler_fit_window`
@@ -218,7 +228,7 @@ The design principle is that the random walk is hard to beat, so the model **lea
 | Block | Series (frequency) | Source |
 |---|---|---|
 | Targets | Brent spot (daily, 1987–), WTI spot (daily, 1986–); monthly real Brent/WTI/RAC deflated by US CPI | EIA, FRED |
-| Term structure | NYMEX WTI contracts 1–4 (daily); full curve via university Datastream/Bloomberg if available | EIA |
+| Term structure | NYMEX WTI contracts 1–4 (daily); no full curve (paid Datastream/Bloomberg data is out of scope) | EIA |
 | Financial | OVX, VIX, broad dollar index, S&P 500, 10Y–2Y spread, gold, Henry Hub | FRED / CBOE |
 | Fundamentals | WPSR stocks and production (weekly); world production, OECD stocks (monthly); RBOB and heating oil spreads | EIA, JODI |
 | Global demand | Kilian real activity index, Baumeister–Korobilis–Lee indicators, OECD+6 industrial production | FRED / authors' sites |
@@ -237,6 +247,7 @@ The design principle is that the random walk is hard to beat, so the model **lea
 
 ## 7. Benchmark suite
 
+- **Volatility ladder (headline):** naive realised vol (last h days), EWMA (lambda 0.94), GARCH(1,1)-t, GJR-GARCH-t, log-HAR (1/5/22 or 63-day), OVX-only regression, **HAR + OVX (the anchor any deep model must beat)**.
 - **Naive/statistical:** no-change (the denominator for every ratio), drift, historical mean, AutoARIMA, ETS, Theta; RW+GARCH-t (density).
 - **Econometric:** futures-based forecasts (Alquist & Kilian 2010), product-spread models, monthly VAR/BVAR, Baumeister–Kilian forecast combination.
 - **ML:** Ridge/LASSO/Elastic Net, LightGBM, Random Forest.
@@ -250,6 +261,11 @@ The design principle is that the random walk is hard to beat, so the model **lea
 ## 8. Evaluation protocol (frozen in week 6, including the agent protocol and the live-test design)
 
 - **Design:** expanding-window, rolling-origin evaluation. Train from 1987, use a validation block for tuning, and run the out-of-sample test from about 2010 to the latest data. The text-based modes are tested 2015+. Refit deep models yearly. Never tune on the test set.
+- **Volatility targets (headline):** forward realised volatility from daily squared Brent returns over t+1..t+h, h in {5, 22, 66}. WTI is a robustness check (OVX is built from WTI options; WTI went negative in 2020). Free intraday data is not available.
+- **Test start:** 2012 for anything using OVX (it starts 2007-05); about 2010 for price-only models.
+- **Gap:** at least h trading days between the last training target and the first test origin (no overlap).
+- **Volatility losses:** QLIKE (primary), MSE(log vol), MSE(variance). **Risk backtests:** Kupiec, Christoffersen, an Expected Shortfall test and FZ0 loss.
+- **Clean holdout:** the last 12 months, untouched until the final run.
 - **Horizons:** daily h ∈ {1, 5, 10, 22, 66} (cumulative log returns, also reported on price levels); monthly h ∈ {1, 3, 6, 12, 24} (log real monthly-average prices).
 - **Sub-periods:** calm vs crisis (2014–16, 2020, 2022, 2025); volatility terciles.
 - **Metrics:**
@@ -275,6 +291,66 @@ The design principle is that the random walk is hard to beat, so the model **lea
 | 12–24 | **Live forward test** | Daily scheduled run of frozen v1 with hash-committed forecasts |
 | 16–20 | **5. Final evaluation** | Single test run; all tests; regime and event studies; economic value; interpretability; robustness (Brent vs WTI, test start, lookback, refit frequency) |
 | 19–26 | **6. Writing and submission** | **Journal** (IJF / Energy Economics): benchmark + leakage audit + AR-MoE Transformer + OilAgent M1 module, submitted around week 26. **Workshop** (non-archival, agentic focus: OilAgent + LLM look-ahead control + live test): target an ICML 2027 workshop (deadlines usually around May; verify). An optional early non-archival ICLR 2027 workshop submission could cover the transformer benchmark. arXiv/SSRN preprint; GitHub + Zenodo DOI |
+
+**Baseline results (2026-11-23). Source of truth: `results/tables/SUMMARY.md`, generated by `experiments/summarise_vol.py` from the CSVs written by `experiments/vol_risk_brent.py` and `experiments/vol_residual_brent.py`. Expanding window, monthly refits, gap = horizon, development data only (test 2012-01 to 2025-06; risk from 2010-01), QLIKE primary.**
+
+**Correction of 2026-11-23 (holdout).** The first baseline runs used data through 2026-09, i.e. they included the clean holdout (2025-07 onward). Every number below was recomputed on development data only; the earlier, larger-sample numbers are superseded. The holdout has now been seen **in aggregate** by the people running this project, so it is no longer a pristine final test; the live forward test (weeks 12-24) is the only fully clean evaluation. A code guard (`oilfc/eval/holdout.py`, tested) now trims every development experiment to before `clean_holdout_start`.
+
+*Volatility ladder, Brent (n = 3,413 / 3,396 / 3,352 origins at 5 / 22 / 66 days).* `ovx_bc` = regression of log volatility on log OVX with a QLIKE-consistent variance correction (training residuals only); `ovx_raw` = OVX as published, no fitted parameters; `lhar_bc` = leverage HAR (Corsi and Reno 2012) with the same correction.
+
+| Brent | 5 days | 22 days | 66 days |
+|---|---|---|---|
+| `ovx_bc` QLIKE gain vs naive | 15.4% (p = 0.020) | 32.4% (p < 0.001) | 25.6% (p < 0.001) |
+| `ovx_raw` (unadjusted) vs naive | 9.9% (p = 0.19) | 34.0% (p = 0.004) | 36.0% (p = 0.032) |
+| `ovx_bc` better than HAR (corrected) | p = 0.006 | p = 0.031 | tied (p = 0.82) |
+| `ovx_bc` better than leverage HAR | p = 0.10 (not sig.) | p = 0.008 | tied (p = 0.66) |
+| `ovx_bc` better than GARCH-t / GJR-t | p = 0.037 / 0.052 | p = 0.005 / 0.037 | tied (p = 0.85 / 0.77) |
+| 90% MCS (QLIKE) | `ovx_bc`, `har_ovx_bc`, `lhar_ovx_bc` only | 7 models incl. raw OVX and plain HAR | 11 models (everything but naive and EWMA) |
+
+- **Reading.** OVX-based forecasts are significantly better than the non-OVX benchmarks at 22 days (p <= 0.037 against corrected HAR, leverage HAR, GARCH-t and GJR-t) and mostly at 5 days (leverage HAR p = 0.10 and GJR p = 0.052 are not significant), and tied with them at 66 days. Adding leverage terms to HAR + OVX changes nothing significant. Raw OVX is tied with the fitted versions at 22 and 66 days; the fitted regression helps at 5 days and on MSE(log vol).
+- **Caveats.** (1) The variance correction was added after seeing uncorrected results; both are reported. (2) QLIKE favours upward-biased forecasts and OVX is typically above realised volatility, so MSE(log vol) must be reported next to it (at 5 days raw OVX is 18% *worse* than naive on MSE(log vol)). (3) No multiplicity correction across three horizons and many comparisons. (4) One asset and one development period.
+- **WTI robustness (`vol_ladder_wti_*d.csv`; negative price of 2020-04-20 removed, so one return spans several days).** Same ranking, much weaker separation: OVX-based models are in the MCS at 5 days (with raw OVX) and beat naive at 5 days (p <= 0.02), but at 22 and 66 days nearly every model, including naive, stays in the MCS and no OVX model is significantly better than the HAR or GARCH variants (p >= 0.07). The Brent result does not replicate cleanly on WTI.
+- **Density (22-day return, zero-mean normal scaled by the volatility forecast).** `ovx_bc` has lower CRPS than naive at 5 and 22 days (0.0276 vs 0.0279, p = 0.019; 0.0617 vs 0.0627, p = 0.0001) and than GARCH-t (p = 0.0009, 0.033); at 22 days it is not significantly better than GJR-t (p = 0.058) or leverage HAR (p = 0.090). At 66 days nothing is significant. Effects are about 1-2%.
+- **Raw OVX and the literature** (`literature/notes/ovx_volatility_check_2026-11-23.md`): the edge is OVX's own information, already suggested by prior work (Haugom et al. 2014, Gilder and Tsiaras 2020, Degiannakis and Filis 2017), so **the paper cannot claim "OVX helps"**. The closest prior work on neural residuals is not oil (arXiv 2610.03019: HAR + LSTM residual did not help; arXiv 2608.25369: econometric anchoring, equities).
+- **Residual models on the HAR + OVX anchor (22 days, shrunk).** Ridge, LightGBM and a small MLP: QLIKE gain vs anchor 4.9% (p = 0.43), 1.5% (p = 0.62), -2.4% (p = 0.54); MSE(log vol) worse for all. All inside the MCS. **No detectable gain from learned residuals; the stretch criterion is not met.**
+- **VaR/ES (Brent; 1 day n = 3,917, 10 days non-overlapping n = 391).** 1 day, 1%: GARCH-t, GJR-t and the simulation versions (FHS) all pass Kupiec, Christoffersen and the ES test (hit rates 0.87-1.07%). 1 day, 5%: the t versions fail coverage (hit rates 6.0%, Kupiec p = 0.005 and 0.008) and FHS passes (5.18%, p = 0.60). 10 days: GJR-FHS passes at 5% (hit rate 6.65%, Kupiec p = 0.15, Christoffersen p = 0.29, ES test p = 0.23) and fails at 1% (2.56%, p = 0.0097, ES test passes). Plain historical simulation passes 10-day coverage but has by far the worst FZ0 (e.g. -0.39 vs -1.08 at 1%). EWMA-normal fails everywhere.
+- **FZ0 (GJR-FHS vs each model, Diebold-Mariano).** Significantly better than EWMA-normal and historical simulation at every horizon and level (p <= 0.03); tied with GARCH-t and GJR-t at 1 day for 1% (p = 0.69, 0.69) and not distinguishable from GJR-t anywhere (p >= 0.64 at 1 day 5%; 0.11 at 10 days 1%); better than GARCH-FHS at 1 day 5% (p = 0.001) and 10 days 5% (p = 0.043). At 10 days, 1% the gain over GARCH-t and GARCH-FHS is borderline (p = 0.057, 0.057).
+- **Transformer residuals on the HAR + OVX anchor (RQ3/RQ4), run on Kaggle (T4/P100 GPU, 5 seeds, 14 yearly refits, development data only; tables in `results/kaggle_residual/`).** Patch transformer (19,009 parameters), flat MLP control (20,881), ridge on the 64-day window; QLIKE gain vs the yearly-refit anchor:
+
+| | Brent 22 days (primary) | Brent 5 days (extra) | WTI 22 days (extra) |
+|---|---|---|---|
+| transformer | -1.2% (p = 0.63) | **+2.6% (p = 0.009)**, MSE(log vol) +2.3% (p = 0.003) | -0.5% (p = 0.58) |
+| MLP (attention-free) | -1.1% (p = 0.57) | +0.4% (p = 0.73) | -2.1% (p = 0.18) |
+| ridge | -0.8% (p = 0.56) | +2.3% (p = 0.32) | +1.7% (p = 0.73), MSE(log vol) -8.3% (p = 0.047) |
+| transformer vs MLP (DM, QLIKE) | p = 0.99 | p = 0.060 | p = 0.22 |
+
+  - **Reading.** At the primary setting (Brent, 22 days) no learned residual helps and attention makes no difference to the MLP (p = 0.99): a null for RQ3 and RQ4. The one significant cell (Brent 5 days, transformer) is an extra, unplanned run, one of nine model-setting comparisons (a Bonferroni-adjusted p of about 0.08), and the transformer-vs-MLP gap there is borderline (p = 0.060).
+  - **Confound found and checked.** The deep models and their anchor are refit yearly, the benchmark ladder monthly. Against the monthly-refit HAR + OVX on the same origins the transformer's 5-day edge is gone (0.4% better, p = 0.72) and it is worse than monthly leverage HAR + OVX (-1.1%, p = 0.77); at 22 days it is 2.4% to 5.8% worse than the monthly benchmarks (p >= 0.40); on WTI it is significantly worse (p = 0.001 vs monthly HAR + OVX). **The apparent 5-day gain is the stale yearly anchor, not the transformer.**
+  - **To do before any claim:** refit the anchor monthly while the residual network refits yearly (or give the benchmarks the same yearly refits), then rerun. Until then the honest status is: no evidence that a transformer residual beats a well-specified HAR + OVX.
+  - Smoke-test and 5-day/WTI files are in the same folder; the Kaggle runs used the holdout guard (`holdout_start` is in each run's JSON).
+
+**Status against the pre-registered criteria (revised draft, before the freeze):**
+
+| Criterion | Status |
+|---|---|
+| Volatility, expected: beat naive, GARCH-t and HAR with p < 0.05 at 2+ horizons (QLIKE) | **Met on Brent** at 22 days (all non-OVX benchmarks, p <= 0.037) and at 5 days against naive, corrected HAR and GARCH-t (leverage HAR and GJR-t not significant); tied at 66 days. **Not replicated on WTI** |
+| Volatility, stretch: a learned residual inside the MCS and beating HAR + OVX at 1+ horizon | **Not met.** Ridge, LightGBM, MLP and transformer residuals: no gain at 22 days; the one significant 5-day transformer cell disappears against monthly-refit benchmarks (anchor-refit confound). Foundation models not run |
+| Risk: 1% and 5% VaR pass Kupiec and Christoffersen; ES test; FZ0 below GARCH-t | **Met at 1 day** (GARCH/GJR with t or simulation at 1%; simulation at 5%). **Partly at 10 days** (GJR-FHS passes 5%, 1% rejects). FZ0 gain over GARCH-t not significant |
+| Density: CRPS better than RW + GARCH-t | **Met on Brent at 5 and 22 days** (small effect, about 1-2%) |
+| Price: MSPE vs no-change at all horizons, null allowed | Not started in the new protocol (DDP result retracted) |
+
+**Revised schedule from week 6 (2026-11-23), replacing the phase 2-5 rows above where they differ:**
+
+| Weeks | Work |
+|---|---|
+| 6 | Protocol update and freeze; ADR 0002; task cards V1-V4 |
+| 7 | V5-V6. **Gate:** project code reproduces the preliminary table (Brent, 22 days, OVX vs naive about 33%, p < 0.01). **Reached 2026-11-23** in `src/oilfc/` (tasks V1-V3, V5, V6; full-sample numbers, which included the clean holdout and are superseded by the development-only numbers below): OVX 31.0% better than naive (DM p = 0.0008) and 21.8% better than HAR; HAR + OVX 21.1% better than HAR (p = 0.002); HAR alone 11.8% better than naive (p = 0.14, not significant). Brent, 22-day log-vol MSE, test 2012-01 to 2026-09, n = 3,718 |
+| 8-10 | GARCH family, MCS, VaR/ES backtests, CRPS. First baseline results table (workshop-ready) |
+| 10-14 | Deep residual models and TSFMs on the HAR + OVX anchor; attention vs attention-free (RQ4) |
+| 14-18 | AR-MoE regime gate; ablations on new data; event intensity (RQ5, M1) if time allows |
+| 18-20 | Leakage-audit section; secondary price result (monthly MSPE vs no-change) |
+| 20-22 | Final holdout run; robustness on WTI, sub-periods, excluding 2020 |
+| 22-26 | Writing: workshop paper first, then the journal paper |
 
 **Journal outline:**
 1. Introduction
@@ -306,11 +382,14 @@ The design principle is that the random walk is hard to beat, so the model **lea
 | Risk | Mitigation |
 |---|---|
 | No gain at daily h = 1–5 | Expected and reported; the anchor bounds losses; claims rest on monthly and regime gains, probabilistic accuracy, the audit and the agent findings |
+| Deep residuals don't beat HAR + OVX | The paper still has three honest results: OVX-based volatility and risk forecasts beat the standard benchmarks by large margins; a rigorous null for deep learning; the leakage audit |
+| "OVX predicts realised vol" is already known | Done 2026-11-23: 22 papers in `lit_matrix.csv` and a note (OVX-volatility links are established in the literature). The contribution is the leakage-controlled deep-residual test with an attention-free control, the FHS risk evaluation and the audit, not "OVX helps" and not "a neural residual on HAR" (read arXiv 2610.03019 and 2608.25369 in full first) |
+| Preliminary volatility numbers are not project results | Week 7 gate: reproduce them in `src/oilfc/` with tests before any claim |
 | Transformers don't beat attention-free controls | Still a publishable answer to RQ4; AR-MoE keeps whichever backbone wins |
 | LLM look-ahead contaminates agent results | Vintages, post-cutoff windows, live test, plus the reporting rule in §4.3 |
 | Hallucinated events | Pydantic schema, mandatory source IDs, critic veto, bounded δ, human audit |
 | Live test too short | Framed as supplementary; daily horizons only; v1 frozen early (week 12) to maximize length |
-| Colab limits / API cost | Small backbones, yearly refits, 4-bit vLLM, LLM cache, API used only for the live test |
+| Free-tier limits (Kaggle GPU hours, API rate limits) | Small backbones, yearly refits, checkpoint every epoch, 4-bit vLLM, LLM cache, two API providers with failover, API used only for the live test |
 | Scope overload (one person, 6 months) | MoSCoW in §1; Phase 3 is a standalone fallback paper; agent M2/M3 can slip to the workshop only |
 
 ---
@@ -325,7 +404,7 @@ The design principle is that the random walk is hard to beat, so the model **lea
 - TSFM packages: `chronos-forecasting`, `timesfm`, `uni2ts`, `tirex`
 - Agents and LLM serving: `vllm`, `langgraph` (or `smolagents`), `pydantic`, MCP Python SDK, LanceDB/Chroma with timestamp-filtered metadata, `sentence-transformers`
 - Experiment tooling: Optuna, Hydra, MLflow, pytest + GitHub Actions
-- Claude Code (hooks + scheduled tasks) for research infrastructure
+- GitHub Actions scheduled workflows (free on public repos) or local cron/Task Scheduler for the daily live job
 
 ```
 Forecasting Crude Oil Prices/

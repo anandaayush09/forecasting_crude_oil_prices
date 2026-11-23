@@ -30,7 +30,7 @@ Rules the tests check:
 - A missing config file raises `FileNotFoundError`; invalid content raises `pydantic.ValidationError`.
 - The API key never appears in `repr(settings)`.
 
-## Decision you must make (write it as ADR 0002 if you like)
+## Decision you must make (write it as ADR 0003 if you like)
 
 `configs/protocol.yaml` has keys the tests do not look at (`design`, `metrics`, `tests`, ...). Do you forbid unknown keys (`extra="forbid"`), ignore them, or model all of them? What does each choice do when someone mistypes a key?
 

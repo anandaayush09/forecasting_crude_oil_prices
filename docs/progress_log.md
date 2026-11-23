@@ -8,3 +8,9 @@
 - Built:
 - Broke:
 - Learned:
+
+## Week 6 (starting 23 Nov 2026)
+
+- Built:
+- Broke:
+- Learned:

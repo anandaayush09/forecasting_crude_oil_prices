@@ -26,6 +26,8 @@ Unfinished task cards live in `docs/tasks/`; their tests show as `XFAIL` until y
 
 `docs/ENGINEERING_ROADMAP.md` (proposed): how AI-engineering concepts, a FastAPI backend and a React UI fit around the research, plus the ownership protocol.
 
+`docs/FREE_RESOURCES.md`: the $0 policy. Every tool, dataset and service used, with its free limit and fallback.
+
 ## Prior work
 
 The earlier DDP thesis (WTI at 1/7/90/180 days) is archived and linked from `prior_work/`:
