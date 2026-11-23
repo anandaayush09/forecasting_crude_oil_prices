@@ -1,0 +1,23 @@
+{
+  "args": {
+    "asset": "brent",
+    "h": 22,
+    "device": "auto",
+    "refit_months": 12,
+    "seeds": 3,
+    "epochs": 80,
+    "seq_len": 64,
+    "test_start": "2012-01-01",
+    "holdout_start": "2025-07-01",
+    "panel": "/kaggle/working/proj/data/processed/panel_daily.parquet",
+    "out": "/kaggle/working/results",
+    "smoke": true
+  },
+  "device": "cuda",
+  "seeds": [
+    0
+  ],
+  "epochs": 5,
+  "n_refits": 2,
+  "transformer_vs_mlp_qlike_dm_p": 0.22235346392954103
+}

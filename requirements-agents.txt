@@ -4,5 +4,5 @@ langgraph==1.2.15
 mcp==2.3.0
 lancedb==0.40.0
 sentence-transformers==6.1.0
-anthropic==1.14.0
+litellm>=1.50  # one interface to free-tier APIs and local open-weight servers
 vllm==0.31.0; sys_platform == "linux"

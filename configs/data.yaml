@@ -11,5 +11,14 @@ fred:
   t10y2y:     {id: T10Y2Y,   lag: {kind: bdays, n: 0}}
   usd_broad:  {id: DTWEXBGS, lag: {kind: bdays, n: 5}}   # Fed H.10, weekly release
   cpi:        {id: CPIAUCSL, lag: {kind: days,  n: 45}}  # dated 1st of ref. month, released ~mid next month
+# Extra EIA series, aligned to their release dates like the FRED ones.
+eia_extra:
+  wti_fut1:     {key: RCLC1,    freq: d, lag: {kind: bdays, n: 0}}  # NYMEX contract 1 settle; EIA stopped publishing after 2024-04-05
+  wti_fut4:     {key: RCLC4,    freq: d, lag: {kind: bdays, n: 0}}  # NYMEX contract 4 settle; same end date
+  crude_stocks: {key: WCESTUS1, freq: w, lag: {kind: days,  n: 6}}  # week ending Friday, released Wednesday (Thursday in holiday weeks)
+# Newspaper-based daily indices from the authors' sites (current files, not real-time vintages).
+indices:
+  gpr_daily: {source: gpr, lag: {kind: days, n: 7}}  # Caldara-Iacoviello daily GPR; file updated about weekly
+  epu_daily: {source: epu, lag: {kind: days, n: 2}}  # Baker-Bloom-Davis US daily EPU; updated about daily
 target: brent_spot
 # TODO(Phase 1b): real-time vintages via ALFRED (needs a free FRED API key) for CPI and other revised series.

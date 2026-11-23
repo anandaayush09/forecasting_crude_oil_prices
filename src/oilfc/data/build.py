@@ -1,6 +1,6 @@
 """Download all series, cache raw files, build the release-aligned daily panel.
 
-    python -m oilfc.data.build [--offline]   (--offline reuses data/raw/*.parquet)
+    python -m oilfc.data.build [--offline]   (--offline reuses data/raw/*.parquet; series not yet cached are downloaded)
 """
 from __future__ import annotations
 
@@ -11,8 +11,11 @@ import pandas as pd
 import yaml
 
 from .align import align_asof
-from .eia import fetch_eia_spot
+from .eia import fetch_eia, fetch_eia_spot
 from .fred import fetch_fred
+from .uncertainty import fetch_epu_daily, fetch_gpr_daily
+
+INDEX_FETCHERS = {"gpr": fetch_gpr_daily, "epu": fetch_epu_daily}
 
 ROOT = Path(__file__).resolve().parents[3]
 RAW, PROCESSED = ROOT / "data" / "raw", ROOT / "data" / "processed"
@@ -40,6 +43,17 @@ def build(offline: bool = False) -> pd.DataFrame:
     for name, spec in cfg["fred"].items():
         s = _get(name, lambda i=spec["id"]: fetch_fred(i), offline)
         a = align_asof(s, index, spec["lag"]["kind"], spec["lag"]["n"])
+        cols[name] = a["value"]
+        cols[f"{name}_age"] = a["release_age_days"]
+    extra = {
+        n: (lambda k=v["key"], f=v["freq"]: fetch_eia(k, f), v["lag"]) for n, v in cfg.get("eia_extra", {}).items()
+    }
+    extra.update(
+        {n: (INDEX_FETCHERS[v["source"]], v["lag"]) for n, v in cfg.get("indices", {}).items()}
+    )
+    for name, (fetch, lag) in extra.items():
+        s = _get(name, fetch, offline)
+        a = align_asof(s, index, lag["kind"], lag["n"])
         cols[name] = a["value"]
         cols[f"{name}_age"] = a["release_age_days"]
     panel = pd.DataFrame(cols, index=index)

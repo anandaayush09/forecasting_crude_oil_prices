@@ -25,3 +25,28 @@ def test_clean_eia_frame_skips_header_rows():
     s = clean_eia_frame(raw, "RBRTE")
     assert s.name == "RBRTE" and s.index.is_monotonic_increasing
     assert s.loc["1987-05-20"] == 18.63 and len(s) == 2
+
+
+def test_parse_gpr_daily_uses_the_integer_day_and_drops_footer_rows():
+    from oilfc.data.uncertainty import parse_gpr_daily
+
+    df = pd.DataFrame({"DAY": [19850102, 19850101, None], "GPRD": [115.7, 230.0, None]})
+    s = parse_gpr_daily(df)
+    assert s.name == "gpr_daily" and s.index.name == "date"
+    assert list(s.index) == [pd.Timestamp("1985-01-01"), pd.Timestamp("1985-01-02")]
+    assert s.iloc[0] == 230.0
+
+
+def test_parse_epu_daily_builds_dates_from_three_columns():
+    from oilfc.data.uncertainty import parse_epu_daily
+
+    text = "day,month,year,daily_policy_index\n2,1,1985,296.43\n1,1,1985,103.83\n"
+    s = parse_epu_daily(text)
+    assert s.name == "epu_daily"
+    assert s.index[0] == pd.Timestamp("1985-01-01") and s.iloc[0] == 103.83
+
+
+def test_eia_url_carries_the_frequency():
+    from oilfc.data.eia import EIA_XLS
+
+    assert EIA_XLS.format(key="WCESTUS1", freq="w").endswith("/WCESTUS1w.xls")

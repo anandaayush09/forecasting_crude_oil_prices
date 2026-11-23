@@ -1,4 +1,4 @@
-"""EIA spot-price downloader (public historical XLS, no API key)."""
+"""EIA downloader (public historical XLS files, no API key): spot and futures prices, weekly stocks."""
 from __future__ import annotations
 
 import io
@@ -6,7 +6,8 @@ import io
 import pandas as pd
 import requests
 
-EIA_XLS = "https://www.eia.gov/dnav/pet/hist_xls/{key}d.xls"
+# freq: "d" daily, "w" weekly. NYMEX futures (RCLC1-4) stopped being published after 2024-04-05.
+EIA_XLS = "https://www.eia.gov/dnav/pet/hist_xls/{key}{freq}.xls"
 
 
 def clean_eia_frame(raw: pd.DataFrame, key: str) -> pd.Series:
@@ -21,8 +22,12 @@ def clean_eia_frame(raw: pd.DataFrame, key: str) -> pd.Series:
     return s.sort_index()
 
 
-def fetch_eia_spot(key: str, timeout: int = 120) -> pd.Series:
-    r = requests.get(EIA_XLS.format(key=key), timeout=timeout)
+def fetch_eia(key: str, freq: str = "d", timeout: int = 120) -> pd.Series:
+    r = requests.get(EIA_XLS.format(key=key, freq=freq), timeout=timeout)
     r.raise_for_status()
     raw = pd.read_excel(io.BytesIO(r.content), sheet_name="Data 1", header=None)
     return clean_eia_frame(raw, key)
+
+
+def fetch_eia_spot(key: str, timeout: int = 120) -> pd.Series:
+    return fetch_eia(key, "d", timeout)
