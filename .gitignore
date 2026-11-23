@@ -20,3 +20,7 @@ outputs/
 
 # DDP thesis archive (moved into prior_work/), never committed
 prior_work/ddp
+
+# built upload bundles for Kaggle (rebuild with kaggle/build_upload.py)
+kaggle/*.zip
+results/kaggle_residual/*.zip
