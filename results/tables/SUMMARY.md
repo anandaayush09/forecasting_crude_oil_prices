@@ -495,3 +495,26 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | rolling_1000 | 10 | 2 |
 | rolling_504 | 5 | 1 |
 | rolling_252 | 4 | 1 |
+
+**Headline against naive, HAR and leverage HAR: monthly against weekly refit (Holm over 18 tests per setting)**
+
+| cell | monthly gain % | monthly p | weekly gain % | weekly p |
+|---|---|---|---|---|
+| BRENT 5d vs naive | 16.1 | 0.0 | 16.6 | 0.0 |
+| BRENT 5d vs har_bc | 14.1 | 0.002 | 14.2 | 0.001 |
+| BRENT 5d vs lhar_bc | 10.3 | 0.0 | 10.4 | 0.0 |
+| BRENT 22d vs naive | 32.4 | 0.0 | 32.5 | 0.0 |
+| BRENT 22d vs har_bc | 22.4 | 0.066 | 22.3 | 0.064 |
+| BRENT 22d vs lhar_bc | 16.2 | 0.011 | 16.2 | 0.01 |
+| BRENT 66d vs naive | 26.3 | 0.001 | 26.3 | 0.001 |
+| BRENT 66d vs har_bc | -1.1 | 0.84 | -1.1 | 0.835 |
+| BRENT 66d vs lhar_bc | -4.4 | 0.601 | -4.5 | 0.601 |
+| WTI 5d vs naive | 22.8 | 0.0 | 23.1 | 0.0 |
+| WTI 5d vs har_bc | 16.8 | 0.001 | 16.9 | 0.001 |
+| WTI 5d vs lhar_bc | 12.1 | 0.001 | 12.3 | 0.0 |
+| WTI 22d vs naive | 42.3 | 0.032 | 42.3 | 0.032 |
+| WTI 22d vs har_bc | 27.0 | 0.073 | 27.0 | 0.072 |
+| WTI 22d vs lhar_bc | 21.3 | 0.046 | 21.5 | 0.043 |
+| WTI 66d vs naive | 41.4 | 0.191 | 41.6 | 0.19 |
+| WTI 66d vs har_bc | 4.1 | 0.115 | 4.3 | 0.116 |
+| WTI 66d vs lhar_bc | 0.9 | 0.639 | 1.2 | 0.547 |

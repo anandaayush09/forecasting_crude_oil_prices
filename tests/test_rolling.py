@@ -88,3 +88,13 @@ def test_a_window_longer_than_the_history_equals_the_expanding_window():
     full = _splits(h=5, months=12)
     big = expanding_splits(INDEX, pd.Timestamp("2010-01-01"), 5, 12, window=10**6)
     assert all((a[0] == b[0]).all() for a, b in zip(full, big, strict=True))
+
+
+def test_day_blocks_give_more_refits_with_the_same_test_origins_and_gap():
+    from oilfc.eval.rolling import expanding_splits
+
+    monthly = _splits(h=22, months=1)
+    weekly = expanding_splits(INDEX, pd.Timestamp("2010-01-01"), 22, 1, refit_days=7)
+    assert len(weekly) > 3 * len(monthly)
+    assert (np.concatenate([t for _, t in weekly]) == np.concatenate([t for _, t in monthly])).all()
+    assert all(train[-1] + 22 < test[0] for train, test in weekly)
