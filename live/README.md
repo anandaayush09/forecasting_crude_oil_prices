@@ -33,7 +33,18 @@ git add live/forecasts && git commit -m "chore(live): forecasts for <origin>"
 .venv/Scripts/python.exe experiments/live_score.py   # verify hashes, score finished windows
 ```
 
-Run it whenever new data appear (EIA prices arrive about once a week). Commit the forecast files straight away: the commit time is the evidence that the forecast was fixed before its target window ended. Pushing the repository to GitHub adds a second, outside time stamp.
+The same steps run by hand when needed (EIA prices arrive about once a week). Commit the forecast files straight away: the commit time is the evidence that the forecast was fixed before its target window ended. Pushing the repository to GitHub adds a second, outside time stamp.
+
+## Automation
+
+From 2026-11-24 a GitHub Actions workflow (`.github/workflows/live.yml`) does the routine above every day at 20:00 UTC. It refreshes the data, writes forecasts for any new origin, verifies every stored hash, scores finished windows and pushes the new files to `main` as `github-actions[bot]`. Most days nothing is new and nothing is committed, because EIA publishes spot prices about once a week.
+
+- **The outside time stamp** is the commit time on GitHub, set by GitHub and not by this computer.
+- **Stopping it:** Actions tab, "Live forecasts", the three dots, "Disable workflow". Run it by hand with "Run workflow".
+- **Pull before you push.** The bot adds commits to `main`, so run `git pull --rebase` before pushing your own work.
+- **Failures** turn the run red and GitHub emails the repository owner. A hash mismatch also fails the run before anything is pushed.
+- **GitHub switches off scheduled workflows after 60 days without repository activity.** Check the Actions tab now and then.
+- **Platform.** The first two forecasts (origin 2026-11-17) were written on Windows by hand, later ones on Ubuntu by the workflow. Numerical differences between the platforms are far below the precision that matters (about 1e-6 in volatility).
 
 ## What this test does and does not show
 

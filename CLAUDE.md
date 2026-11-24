@@ -12,7 +12,7 @@ Python 3.12, pandas, numpy, scipy, statsmodels, arch, scikit-learn, LightGBM, Py
 - Test: `python -m pytest -q`
 - Lint: `python -m ruff check . && python -m ruff format --check .`
 - Results summary: `python experiments/summarise_vol.py`
-- Live forecasts: `python experiments/live_run.py`, commit `live/forecasts` at once, then `python experiments/live_score.py` (see `live/README.md`; forecast files are never edited or overwritten)
+- Live forecasts: run daily by `.github/workflows/live.yml` (the bot pushes to main: `git pull --rebase` before you push). By hand: `python experiments/live_run.py`, commit `live/forecasts` at once, then `python experiments/live_score.py` (see `live/README.md`; forecast files are never edited or overwritten)
 - API: `python -m uvicorn oilfc.api.app:app` (read-only, spec in `docs/api_spec.md`)
 
 ## Layout
