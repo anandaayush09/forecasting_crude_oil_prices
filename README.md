@@ -71,7 +71,7 @@ Log-linear forecasts use a variance correction (training residual variance only)
 - **The loss matters.** QLIKE favours upward-biased forecasts, and OVX typically sits above realised volatility. At 5 days GARCH has a positive QLIKE gain and a negative MSE(log volatility) gain, and the ranking of corrected and uncorrected HAR flips between the two. Both are reported in the tables.
 - Unadjusted OVX already beats naive at 22 and 66 days. The edge is the information in OVX, which earlier literature points to, so the contribution is not "OVX helps". See [the literature note](literature/notes/ovx_volatility_check_2026-11-23.md).
 - **Risk (Brent):** at 1 day, GARCH and GJR with filtered simulation pass Kupiec and Christoffersen at 1% and 5%. The t versions also pass at 1% and miss the 5% coverage (hit rates about 6.0%). On the joint FZ0 loss, GJR with simulation is not significantly different from GJR with t errors (p = 0.69 at 1%, 0.64 at 5%). At 10 days GJR with simulation passes at 5% and fails at 1%, while plain historical simulation passes 10-day 1% coverage but has by far the worst FZ0.
-- **Negative results:** learned residual models do not beat HAR + OVX. The one nominal transformer gain (Brent, 5 days, +2.5% against its own anchor, p = 0.014) does not survive a correction for nine comparisons (Holm-adjusted p = 0.13), and added to the monthly HAR + OVX benchmark it is +1.6% (p = 0.13). Adding futures slope, crude stocks, GPR, EPU or VIX improves QLIKE in none of 12 cells, and makes it significantly worse in some (for example VIX for Brent at 22 days). Small MSE gains appear for WTI at 5 days (policy uncertainty and all groups together).
+- **Negative results:** learned residual models do not beat HAR + OVX. The one nominal transformer gain (Brent, 5 days, +2.5% against its own anchor, p = 0.014) does not survive a correction for nine comparisons (Holm-adjusted p = 0.13), and added to the monthly HAR + OVX benchmark it is +1.6% (p = 0.13). Adding futures slope, crude stocks, GPR, EPU or VIX improves QLIKE in none of 12 cells, and makes it significantly worse in some (for example VIX for Brent at 22 days). Small MSE gains appear for WTI at 5 days (policy uncertainty and all groups together). The exchange-rate channel (the broad dollar index, its 22-day change and its 22-day volatility, added to the strict-timing headline) also adds nothing: no QLIKE improvement is significant, none survives Holm correction, and at 5 days the volatility input is significantly worse on MSE(log volatility) (p <= 0.019 in four cells). Its large QLIKE changes at 66 days (+11% to +16%, p > 0.3) come with worse MSE and are not credible. The S&P 500 could not be tested because FRED holds it only from 2016.
 
 Full tables: [results/tables/SUMMARY.md](results/tables/SUMMARY.md). Decisions and caveats: [ROADMAP.md](ROADMAP.md), [docs/adr/](docs/adr/).
 
@@ -101,7 +101,7 @@ notebooks/, kaggle/    Kaggle GPU notebook and bundle builder
 results/tables/        generated tables (SUMMARY.md is the readable one)
 configs/               series and release lags, protocol draft
 docs/, literature/     decisions, task cards, free-resource register, literature matrix
-tests/                 unit tests (153 pass, 22 are expected failures for unfinished task cards)
+tests/                 unit tests (156 pass, 22 are expected failures for unfinished task cards)
 prior_work/            reference notes on the earlier thesis
 ```
 

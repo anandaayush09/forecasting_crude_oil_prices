@@ -387,3 +387,26 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 22d | gjr_t | 0.232 | 0.259 | 0.017 | 1.2 | -0.249 |
 | WTI 22d | lhar_ovx_bc_lag1 | 0.245 | 0.224 | 0.035 | 1.236 | -0.244 |
 | WTI 22d | unmanaged | 0.492 | 0.48 | 0.319 | 2.519 | -0.077 |
+
+**Dollar-index channel added to the headline (gain > 0: better; Holm over 18 QLIKE tests)**
+
+| cell | spec | qlike_gain_pct | dm_p_qlike | dm_p_qlike_holm | mse_gain_pct | dm_p_mse |
+|---|---|---|---|---|---|---|
+| BRENT 5d | +usd_chg | -0.449 | 0.039 | 0.694 | -0.234 | 0.305 |
+| BRENT 5d | +usd_vol | -0.009 | 0.993 | 1.0 | -2.257 | 0.001 |
+| BRENT 5d | +both | -0.415 | 0.654 | 1.0 | -2.434 | 0.0 |
+| BRENT 22d | +usd_chg | 0.08 | 0.888 | 1.0 | 0.144 | 0.909 |
+| BRENT 22d | +usd_vol | 3.519 | 0.556 | 1.0 | -5.836 | 0.152 |
+| BRENT 22d | +both | 3.826 | 0.539 | 1.0 | -5.522 | 0.157 |
+| BRENT 66d | +usd_chg | -1.696 | 0.427 | 1.0 | 1.935 | 0.335 |
+| BRENT 66d | +usd_vol | 11.853 | 0.356 | 1.0 | -3.316 | 0.543 |
+| BRENT 66d | +both | 11.109 | 0.346 | 1.0 | -1.022 | 0.837 |
+| WTI 5d | +usd_chg | -0.392 | 0.084 | 1.0 | 0.168 | 0.421 |
+| WTI 5d | +usd_vol | -0.25 | 0.508 | 1.0 | -1.011 | 0.001 |
+| WTI 5d | +both | -0.672 | 0.099 | 1.0 | -0.836 | 0.019 |
+| WTI 22d | +usd_chg | 2.631 | 0.094 | 1.0 | 3.698 | 0.287 |
+| WTI 22d | +usd_vol | 2.611 | 0.557 | 1.0 | -4.83 | 0.122 |
+| WTI 22d | +both | 5.335 | 0.341 | 1.0 | -0.938 | 0.743 |
+| WTI 66d | +usd_chg | -1.131 | 0.527 | 1.0 | 2.728 | 0.308 |
+| WTI 66d | +usd_vol | 16.196 | 0.338 | 1.0 | -4.396 | 0.506 |
+| WTI 66d | +both | 15.752 | 0.324 | 1.0 | -1.296 | 0.827 |
