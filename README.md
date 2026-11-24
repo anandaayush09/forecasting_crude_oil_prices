@@ -93,11 +93,12 @@ src/oilfc/features/    daily channels, exogenous features
 src/oilfc/eval/        targets, losses, tests, rolling splits, risk, holdout, calibration, Holm
 src/oilfc/models/      HAR, OVX and GARCH baselines, residual models
 experiments/           scripts that write results/tables/*.csv
+live/                  frozen live forecasts, manifest and scores (see live/README.md)
 notebooks/, kaggle/    Kaggle GPU notebook and bundle builder
 results/tables/        generated tables (SUMMARY.md is the readable one)
 configs/               series and release lags, protocol draft
 docs/, literature/     decisions, task cards, free-resource register, literature matrix
-tests/                 unit tests (108 pass, 26 are expected failures for unfinished task cards)
+tests/                 unit tests (114 pass, 26 are expected failures for unfinished task cards)
 prior_work/            reference notes on the earlier thesis
 ```
 
@@ -129,6 +130,10 @@ Verified in this environment (Windows): the test suite, lint, the offline data b
 ## Project stages
 
 - `v0.1.0`: first working volatility and risk benchmark (Brent and WTI ladders, filtered-simulation VaR/ES, residual models, evaluation library with holdout helpers).
+
+## Live forward test
+
+Because the clean holdout was seen in aggregate by an early run, the only pristine test of the headline is a forward one. Since 2026-11-24, `experiments/live_run.py` writes frozen, SHA-256-stamped forecasts of volatility at 5, 22 and 66 days for Brent and WTI from six models, and `experiments/live_score.py` scores them once the windows have ended. The first forecasts have origin 2026-11-17. Nothing is scored yet, and a significance test is not meaningful before roughly 60 origins per horizon. How it works and what it can and cannot show: [live/README.md](live/README.md).
 
 ## Prior work
 
