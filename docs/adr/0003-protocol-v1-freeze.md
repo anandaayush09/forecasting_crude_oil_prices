@@ -20,6 +20,7 @@
 - Renamed to the names used in code: benchmarks (`naive`, `har_bc`, ..., `lhar_ovx_bc_lag1`, `garch_t`, `gjr_t`).
 - Removed because no code runs them: `mse_var` as a loss, the `metrics` entries MASE, success ratio, Winkler and coverage, and the `tests` entries Clark-West, Giacomini-White, multi-horizon SPA, Giacomini-Rossi and Pesaran-Timmermann. Kept: `ewma`, the ES exceedance test, CRPS and pinball, which `experiments/vol_risk_brent.py` uses. `daily` and `monthly` blocks are unchanged because the unfinished settings task (E0-2) reads them.
 - Changed: deep residual models refit yearly, the anchor monthly (was "deep: yearly").
+- Added `inference.window_sensitivity` (rolling windows of 1000, 504 and 252 days). The check is in `results/tables/window_robustness.csv`. It shows the 5-day gain survives rolling windows, while most of the Holm-corrected evidence does not (13 of 30 comparisons with the expanding window, 1 or 2 with rolling ones).
 - Disclosed as a limitation in the file: the residual pipeline's anchor uses same-day OVX, the headline uses the lag. Fixing that needs a Kaggle rerun.
 
 ## The six items of task card V4: proposed answers
