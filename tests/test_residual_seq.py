@@ -4,8 +4,10 @@ import pytest
 
 from oilfc.eval.rolling import expanding_splits
 from oilfc.features.vol import lag_window
-from oilfc.models.dl.residual_seq import SeqResidualRegressor
 from oilfc.models.ml.residual import residual_forecast
+
+pytest.importorskip("torch", reason="the deep-learning tests need requirements-dl.txt")
+from oilfc.models.dl.residual_seq import SeqResidualRegressor  # noqa: E402
 
 L, C = 16, 3
 
