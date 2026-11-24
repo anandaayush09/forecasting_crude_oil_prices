@@ -146,8 +146,8 @@ def main():
         from oilfc.eval.mcs import model_confidence_set
 
         table = table.join(model_confidence_set(ql, block_size=a.h))
-    except ImportError:
-        print("arch not installed: skipping the Model Confidence Set")
+    except (ImportError, RuntimeError) as e:  # keep the other results if the MCS cannot run
+        print(f"skipping the Model Confidence Set: {e}")
 
     # attention vs no attention, head to head (RQ4)
     table.attrs["transformer_vs_mlp_qlike_dm_p"] = dm_hln(
