@@ -211,8 +211,8 @@ def risk_backtests(r, test_start="2010-01-01", taus=(0.01, 0.05), h=10):
 
 
 def main(horizons=(5, 22, 66)):
-    """Modes (arguments): `wti` runs the volatility ladder on WTI only; `risk-only` runs the VaR/ES
-    backtests only; `ladder-only` skips the risk backtests; no argument runs everything for Brent."""
+    """Modes (arguments): `wti` selects WTI instead of Brent; `risk-only` runs the VaR/ES backtests
+    only; `ladder-only` skips the risk backtests; no argument runs everything for Brent."""
     OUT.mkdir(parents=True, exist_ok=True)
     pd.set_option("display.width", 250, "display.max_columns", 30)
     asset = "wti" if "wti" in sys.argv else "brent"
@@ -222,11 +222,11 @@ def main(horizons=(5, 22, 66)):
         vol.to_csv(OUT / f"vol_ladder_{asset}_{h}d.csv")
         print(f"\n{asset} {h}-day volatility ladder (test 2012-01 onward)")
         print(vol.round(4).to_string(), flush=True)
-    if asset == "wti" or "ladder-only" in sys.argv:
+    if "ladder-only" in sys.argv:
         return
     rk, dm = risk_backtests(r)
-    rk.to_csv(OUT / "risk_backtests_brent.csv", index=False)
-    dm.to_csv(OUT / "risk_fz0_dm_brent.csv", index=False)
+    rk.to_csv(OUT / f"risk_backtests_{asset}.csv", index=False)
+    dm.to_csv(OUT / f"risk_fz0_dm_{asset}.csv", index=False)
     print("\nVaR / ES backtests (price-only, test 2010-01 onward)")
     print(rk.round(4).to_string(index=False))
     print("\nFZ0: GJR-FHS vs each model (Diebold-Mariano, h = 1)")
