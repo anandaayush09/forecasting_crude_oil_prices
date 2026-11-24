@@ -1,6 +1,5 @@
 """V2: volatility and density losses. See docs/tasks/V2_losses.md.
 
-Marked xfail until you implement src/oilfc/eval/losses.py. When all tests pass, delete the pytestmark line.
 All three functions work element by element and return an array/Series of the same length as the input.
 """
 

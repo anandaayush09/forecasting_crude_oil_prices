@@ -1,6 +1,5 @@
 """V3: Diebold-Mariano test with the Harvey-Leybourne-Newbold correction. See docs/tasks/V3_dm_test.md.
 
-Marked xfail until you implement src/oilfc/eval/stat_tests.py. When all tests pass, delete the pytestmark line.
 
 dm_hln(loss_a, loss_b, h) -> (statistic, p_value)
   loss_a, loss_b: per-origin losses of two forecasts (1-D arrays or Series of equal length)

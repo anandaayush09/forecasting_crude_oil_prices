@@ -1,6 +1,5 @@
 """V6: volatility benchmark ladder. See docs/tasks/V6_vol_baselines.md.
 
-Marked xfail until you implement src/oilfc/models/baselines/vol.py. When all tests pass, delete the pytestmark line.
 
 Interface
   ewma_vol(returns, lam=0.94) -> Series      annualised EWMA volatility, uses returns up to and including t

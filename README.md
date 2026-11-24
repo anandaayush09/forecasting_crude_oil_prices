@@ -1,38 +1,137 @@
-# Multi-Horizon Crude Oil Price Forecasting with Transformers and Agentic AI
+# Crude Oil Volatility and Risk Forecasting
 
-See ROADMAP.md for the research plan, timeline and evaluation protocol.
+This project asks which forecasts of **crude oil volatility** and **tail risk** beat the standard benchmarks, tested out of sample and without look-ahead. It covers Brent and WTI at **5, 22 and 66 trading days**, scores forecasts with **QLIKE** and formal tests, and reports negative results as plainly as positive ones.
 
-Setup (Python 3.12):
-    python -m venv .venv && .venv/Scripts/activate
-    pip install -r requirements.txt            # core
-    pip install -r requirements-dl.txt         # + torch, transformers, TSFMs
-    pip install -r requirements-agents.txt     # + agent stack (vllm: Linux/Colab only)
-    # Moirai needs its own venv: pip install -r requirements-moirai.txt
-    pytest tests -q
+Status: research in progress (release `v0.1.0`). The headline result so far is that a **leverage HAR regression with the OVX implied-volatility index** (OVX lagged one day) beats naive, HAR and GARCH forecasts for Brent at 5 days and for most benchmarks at 22 days. No learned model (ridge, LightGBM, neural network, transformer) beats a well-specified HAR + OVX regression yet. The research plan is in [ROADMAP.md](ROADMAP.md).
 
-Protocol freeze: tag `protocol-frozen` (week 6). Test-split access is gated on it.
+## Research problem
 
-## Dev workflow
+Price forecasts for oil are hard to improve on the no-change forecast, and a published gain is often a data leak. An earlier thesis in this archive (see Prior work) reported a 26% error reduction at 7 days that disappeared once three features computed from the whole series were removed. This project therefore moves to targets with more predictable structure:
 
-    make lint            # ruff check + format check (same as CI)
-    make fmt             # auto-fix and format
-    make test            # pytest
-    pre-commit install   # once: run the checks automatically on every commit
+- **Volatility:** the annualised realised volatility over the next 5, 22 and 66 trading days.
+- **Risk:** 1-day and 10-day Value at Risk (VaR) and Expected Shortfall (ES) at 1% and 5%.
+- **Price:** reported as a secondary result, with a null result allowed.
 
-`make` is not installed on Windows by default; run the commands inside the Makefile directly (e.g. `python -m ruff check .`).
-Unfinished task cards live in `docs/tasks/`; their tests show as `XFAIL` until you implement them.
+## Data and provenance
 
-## Engineering plan
+Every series is free and needs no key. Each is aligned to its **release date** so that a value is used only once it was public (`src/oilfc/data/align.py`, lags in `configs/data.yaml`).
 
-`docs/ENGINEERING_ROADMAP.md` (proposed): how AI-engineering concepts, a FastAPI backend and a React UI fit around the research, plus the ownership protocol.
+| Series | Source | Release lag used |
+|---|---|---|
+| Brent, WTI spot | EIA (daily, from 1987 and 1986) | 0 days |
+| OVX, VIX, 10Y-2Y spread | FRED | 0 days |
+| Broad dollar index | FRED | 5 business days |
+| NYMEX futures, contracts 1 and 4 | EIA | 0 days, **ends 2024-04-05** |
+| US crude stocks | EIA weekly | 6 days |
+| Geopolitical risk (GPR), policy uncertainty (EPU) | authors' sites, newspaper-based | 7 and 2 days |
 
-`docs/FREE_RESOURCES.md`: the $0 policy. Every tool, dataset and service used, with its free limit and fallback.
+The panel also holds the S&P 500 (FRED keeps about ten years) and CPI (45-day lag). They are not used in the experiments. The built panel has 9,102 rows from 1987-05-20 to 2026-10-06. OVX starts in 2007-05, so every OVX-based test starts in 2012-01.
+
+Data quality handling covered by code and tests: release-date alignment (`tests/test_alignment.py`), the WTI price below zero on 2020-04-20 (removed before taking returns), futures values older than 10 days masked and non-positive futures prices set to missing (`src/oilfc/features/exog.py`), and parsers tested on small fixtures (`tests/test_parsers.py`). There is no exploratory notebook yet. GPR and EPU are the current published files, not real-time vintages, and the downloads are not versioned, so a rebuild can pick up revisions.
+
+**A timing caveat that matters.** OVX for day t is computed at the New York close of t, after the Brent assessment (London) and after the WTI settlement. Using OVX(t) at origin t is therefore slightly more favourable than a forecaster could have had. The headline results use **OVX(t-1)**, and the same-day numbers are kept as the optimistic alignment.
+
+## Method
+
+- **Target:** forward realised volatility, `sqrt(252 * mean(r^2))` over the next `h` returns (`src/oilfc/eval/targets.py`).
+- **Evaluation:** expanding window with monthly refits. Training origins stop `h + 1` trading days before the first test origin, so every training target (which looks `h` days ahead) is fully realised before the first test origin and no training target overlaps the test block. There is no further embargo beyond that (`src/oilfc/eval/rolling.py`). Test period 2012-01 to 2025-06 for volatility, 2010-01 to 2025-06 for the price-only risk backtests.
+- **Clean holdout:** data from 2025-07-01 are not used in development. Helper functions (`src/oilfc/eval/holdout.py`, unit-tested) trim and check the data, and each experiment script calls them. Nothing forces a new script to do so, and the date comes from `configs/protocol.yaml`, which is still a draft.
+- **Loss:** **QLIKE** is primary, because it ranks volatility forecasts correctly even when the realised-volatility proxy is noisy (Patton 2011). MSE of log volatility is reported next to it.
+- **Tests:** Diebold-Mariano with the Harvey-Leybourne-Newbold correction (a rectangular window of `h` autocovariances, standard for h-step forecasts), and the 90% Model Confidence Set.
+- **Risk backtests:** Kupiec coverage, Christoffersen independence and conditional coverage, an Expected Shortfall exceedance test, and the FZ0 joint loss.
+
+## Models compared
+
+| Family | Models |
+|---|---|
+| Naive and smoothing | last-window volatility, EWMA |
+| HAR family | HAR on log volatility (5, 22, 63 days), leverage HAR |
+| Implied volatility | raw OVX, OVX regression, HAR + OVX, leverage HAR + OVX |
+| GARCH family | GARCH(1,1)-t, GJR-GARCH(1,1)-t |
+| Learned residuals | ridge, LightGBM, a small MLP and a patch transformer, each predicting a shrunk correction on top of HAR + OVX |
+| Risk | GARCH and GJR with t errors and with filtered historical simulation, EWMA-normal, plain historical simulation |
+
+Log-linear forecasts use a variance correction (training residual variance only) so they are consistent with QLIKE. It was added after the uncorrected forecasts looked worse on QLIKE than on MSE, so both versions are reported in the tables.
+
+## Findings (development data)
+
+**Brent, leverage HAR + OVX(t-1), QLIKE:**
+
+| | 5 days | 22 days | 66 days |
+|---|---|---|---|
+| Gain over naive | 16.1% (p < 0.001) | 32.4% (p < 0.001) | 26.3% (p = 0.001) |
+| Better than HAR (corrected) | p = 0.002 | p = 0.066 | tied |
+| Better than leverage HAR | p < 0.001 | p = 0.011 | tied |
+| Better than GARCH-t / GJR-t | p < 0.001 / < 0.001 | p = 0.002 / 0.007 | tied |
+
+- **WTI** shows the same direction at 5 days (22.8% over naive, p < 0.001, better than HAR, leverage HAR and GARCH with p <= 0.001) and a weaker 22-day result (42.3% over naive, p = 0.032, but HAR p = 0.073). At 66 days no model is separable. The Brent result does not replicate cleanly at longer horizons.
+- **The OVX-only regression is weaker under strict timing:** 11.9% over naive at 5 days (p = 0.089) and 28.8% at 22 days (p = 0.002, not significantly better than GJR-t).
+- **The loss matters.** QLIKE favours upward-biased forecasts, and OVX typically sits above realised volatility. At 5 days GARCH has a positive QLIKE gain and a negative MSE(log volatility) gain, and the ranking of corrected and uncorrected HAR flips between the two. Both are reported in the tables.
+- Unadjusted OVX already beats naive at 22 and 66 days. The edge is the information in OVX, which earlier literature points to, so the contribution is not "OVX helps". See [the literature note](literature/notes/ovx_volatility_check_2026-11-23.md).
+- **Risk (Brent):** at 1 day, GARCH and GJR with filtered simulation pass Kupiec and Christoffersen at 1% and 5%. The t versions also pass at 1% and miss the 5% coverage (hit rates about 6.0%). On the joint FZ0 loss, GJR with simulation is not significantly different from GJR with t errors (p = 0.69 at 1%, 0.64 at 5%). At 10 days GJR with simulation passes at 5% and fails at 1%, while plain historical simulation passes 10-day 1% coverage but has by far the worst FZ0.
+- **Negative results:** learned residual models do not beat HAR + OVX. The one significant transformer cell (Brent, 5 days) disappears against benchmarks refit monthly. Adding futures slope, crude stocks, GPR, EPU or VIX improves QLIKE in none of 12 cells, and makes it significantly worse in some (for example VIX for Brent at 22 days). Small MSE gains appear for WTI at 5 days (policy uncertainty and all groups together).
+
+Full tables: [results/tables/SUMMARY.md](results/tables/SUMMARY.md). Decisions and caveats: [ROADMAP.md](ROADMAP.md), [docs/adr/](docs/adr/).
+
+## Limitations
+
+- **Multiple testing is not corrected.** Each horizon and asset compares about nine models, and there are three horizons and two assets. Treat p-values near 0.05 as suggestive.
+- **Few independent windows at long horizons.** At 66 days the 3,350 origins contain about 50 non-overlapping windows, and the Diebold-Mariano variance uses 66 unweighted autocovariances, which is noisy.
+- **One development window of 13.5 years,** a few regimes, and no sub-period or ex-2020 results yet. The first 2012 refit has about 1,150 OVX rows.
+- **The headline specification was refined after seeing results** (variance correction, leverage terms, strict OVX timing). All versions are in the tables, but the choice is a forking path.
+- **The holdout from 2025-07 was seen in aggregate** by an early run, so only the planned live forward test is a pristine test.
+- **Association, not causation.** OVX is a forward-looking market measure, so its link to later volatility is mechanical. No economic value (for example volatility targeting or hedging cost) has been measured.
+- **10-day backtests have 391 non-overlapping periods,** which gives low power at the 1% level.
+- Futures data end in April 2024, and GPR and EPU are not real-time vintages.
+
+## Repository layout
+
+```
+src/oilfc/data/        downloaders and release-date alignment
+src/oilfc/features/    daily channels, exogenous features
+src/oilfc/eval/        targets, losses, tests, rolling splits, risk, holdout helpers
+src/oilfc/models/      HAR, OVX and GARCH baselines, residual models
+experiments/           scripts that write results/tables/*.csv
+notebooks/, kaggle/    Kaggle GPU notebook and bundle builder
+results/tables/        generated tables (SUMMARY.md is the readable one)
+configs/               series and release lags, protocol draft
+docs/, literature/     decisions, task cards, free-resource register, literature matrix
+tests/                 unit tests (94 pass, 26 are expected failures for unfinished task cards)
+prior_work/            reference notes on the earlier thesis
+```
+
+## Reproduce
+
+Python 3.12 (the development environment used 3.12.0rc3).
+
+```bash
+python -m venv .venv
+.venv/Scripts/activate                       # Windows; on Linux or macOS: source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dl.txt -r requirements-dev.txt
+PYTHONPATH=src python -m oilfc.data.build    # add --offline to reuse cached raw files
+python -m pytest -q
+python experiments/vol_risk_brent.py ladder-only   # Brent ladders (about 10 minutes)
+python experiments/vol_risk_brent.py wti
+python experiments/vol_risk_brent.py risk-only
+python experiments/vol_residual_brent.py     # ridge, LightGBM, MLP residuals
+python experiments/vol_exog.py               # new data groups
+python experiments/vol_ovx_timing.py         # OVX(t) versus OVX(t-1)
+python experiments/residual_vs_monthly.py    # needs results/kaggle_residual/ (committed)
+python experiments/summarise_vol.py          # writes results/tables/SUMMARY.md
+```
+
+The transformer experiment runs on a free Kaggle GPU: see [docs/kaggle_transformer_residual.md](docs/kaggle_transformer_residual.md). Its outputs in `results/kaggle_residual/` are committed. Seeds: ridge is deterministic, LightGBM and the MLP use `random_state=0`, the transformer averages seeds 0 to 4. Lint with `python -m ruff check . && python -m ruff format --check .`.
+
+Verified in this environment (Windows): the test suite, lint, the offline data build and every experiment script. Not verified: a fresh virtual environment install from the requirements files (they pin some heavy packages this work does not need), a Linux or macOS run, and the GitHub Actions workflow, which has not run yet.
+
+## Project stages
+
+- `v0.1.0`: first working volatility and risk benchmark (Brent and WTI ladders, filtered-simulation VaR/ES, residual models, evaluation library with holdout helpers).
 
 ## Prior work
 
-The earlier DDP thesis (WTI at 1/7/90/180 days) is archived and linked from `prior_work/`:
-- `prior_work/README.md`: map of the archive, canonical files and caveats
-- `prior_work/DDP_KNOWLEDGE_BASE.md`: what was done, results, pitfalls, reusable pieces
-- `prior_work/ddp/`: the full DDP archive itself (gitignored; `C:\Users\anand\Documents\DDP1` now links here)
+The earlier thesis on WTI price forecasting at 1, 7, 90 and 180 days is archived with notes in `prior_work/`. It is reference only: its 7-day gain came from look-ahead features, and nothing from it is used here except lessons. The free-resource policy is in [docs/FREE_RESOURCES.md](docs/FREE_RESOURCES.md).
 
-This project starts fresh; the old work is reference only.
+## Licence
+
+MIT, see [LICENSE](LICENSE).

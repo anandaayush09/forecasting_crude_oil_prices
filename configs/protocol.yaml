@@ -20,7 +20,7 @@ design:
   test_start: 2010-01-01          # price-only models
   ovx_test_start: 2012-01-01      # anything using OVX (starts 2007-05)
   text_modes_test_start: 2015-01-01
-  gap: horizon                    # trading days between the last training target and the first test origin
+  gap: horizon                    # training origins end h + 1 rows before the first test origin: every training target is realised before it
   refit: {deep: yearly, statistical: monthly}
   seeds: 5
 clean_holdout_start: 2025-07-01   # TSFM contamination control; for volatility also keep the last 12 months untouched
