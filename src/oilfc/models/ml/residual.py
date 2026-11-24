@@ -34,6 +34,7 @@ def residual_forecast(
     model_factory: Callable,
     val_fraction: float = 0.2,
     variance_correction: bool = False,
+    residual_refit_every: int = 1,
 ) -> pd.DataFrame:
     """Anchor + alpha * learned residual, for every test origin.
 
@@ -46,33 +47,47 @@ def residual_forecast(
     variance_correction: add s2 to both the anchor and the final forecast, where s2 is the variance of
     the validation-block error of anchor + alpha * residual (training data only). This makes the
     log-volatility forecast suitable for QLIKE (see vol.forecast_log_linear).
+    residual_refit_every: steps 2, 3 and the residual-model part of step 4 (and s2) run on every
+    k-th usable split and are reused in between, while the anchor is refit on all training rows at
+    every split. With monthly splits and k = 12 the anchor refits monthly (like the benchmarks) and
+    the expensive model yearly. A reused model only ever saw rows older than its own refit.
     Splits with fewer than MIN_TRAIN_ROWS complete training rows are skipped.
     Returns a DataFrame indexed like X with columns anchor, residual, alpha, pred (log volatility),
     NaN outside the test blocks.
     """
+    if residual_refit_every < 1:
+        raise ValueError("residual_refit_every must be at least 1")
     out = pd.DataFrame(np.nan, index=X.index, columns=["anchor", "residual", "alpha", "pred"])
     need = sorted(set(anchor_cols) | set(feature_cols))
+    cache = None  # (final residual model, alpha, s2) from the last residual refit
+    usable = 0
     for train, test in splits:
         data = X.iloc[train][need].join(y_log.iloc[train].rename("y")).dropna()
         if len(data) < MIN_TRAIN_ROWS:
             continue
-        n_val = max(int(len(data) * val_fraction), 1)
-        fit, val = data.iloc[:-n_val], data.iloc[-n_val:]
-
-        beta = _ols(fit[anchor_cols].to_numpy(), fit["y"].to_numpy())
-        res_fit = fit["y"].to_numpy() - _predict_ols(beta, fit[anchor_cols].to_numpy())
-        model = model_factory().fit(fit[feature_cols].to_numpy(), res_fit)
-        anchor_val = _predict_ols(beta, val[anchor_cols].to_numpy())
-        corr_val = model.predict(val[feature_cols].to_numpy())
-        errors = [np.mean((val["y"].to_numpy() - anchor_val - a * corr_val) ** 2) for a in ALPHAS]
-        alpha = float(ALPHAS[int(np.argmin(errors))])
-        s2 = 0.0
-        if variance_correction:
-            s2 = float(np.var(val["y"].to_numpy() - anchor_val - alpha * corr_val))
-
         beta = _ols(data[anchor_cols].to_numpy(), data["y"].to_numpy())
-        res_all = data["y"].to_numpy() - _predict_ols(beta, data[anchor_cols].to_numpy())
-        model = model_factory().fit(data[feature_cols].to_numpy(), res_all)
+        if usable % residual_refit_every == 0:
+            n_val = max(int(len(data) * val_fraction), 1)
+            fit, val = data.iloc[:-n_val], data.iloc[-n_val:]
+
+            beta_fit = _ols(fit[anchor_cols].to_numpy(), fit["y"].to_numpy())
+            res_fit = fit["y"].to_numpy() - _predict_ols(beta_fit, fit[anchor_cols].to_numpy())
+            model = model_factory().fit(fit[feature_cols].to_numpy(), res_fit)
+            anchor_val = _predict_ols(beta_fit, val[anchor_cols].to_numpy())
+            corr_val = model.predict(val[feature_cols].to_numpy())
+            errors = [
+                np.mean((val["y"].to_numpy() - anchor_val - a * corr_val) ** 2) for a in ALPHAS
+            ]
+            alpha = float(ALPHAS[int(np.argmin(errors))])
+            s2 = 0.0
+            if variance_correction:
+                s2 = float(np.var(val["y"].to_numpy() - anchor_val - alpha * corr_val))
+
+            res_all = data["y"].to_numpy() - _predict_ols(beta, data[anchor_cols].to_numpy())
+            model = model_factory().fit(data[feature_cols].to_numpy(), res_all)
+            cache = (model, alpha, s2)
+        usable += 1
+        model, alpha, s2 = cache
 
         te = X.iloc[test][need]
         ok = te.notna().all(axis=1).to_numpy()
