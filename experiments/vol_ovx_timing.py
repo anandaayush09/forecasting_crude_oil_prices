@@ -38,8 +38,11 @@ HAR = ["log_rv_5", "log_rv_22", "log_rv_63"]
 LEV = ["neg_ret_1", "neg_ret_5", "neg_ret_22"]
 
 
-def forecasts(asset: str, h: int, panel: pd.DataFrame) -> pd.DataFrame:
-    """Realised volatility `y` and every model's forecast, one row per origin in the test period."""
+def forecasts(asset: str, h: int, panel: pd.DataFrame, window: int | None = None) -> pd.DataFrame:
+    """Realised volatility `y` and every model's forecast, one row per origin in the test period.
+
+    window: training rows per refit (rolling window); None = expanding window (the headline design).
+    """
     price = panel[f"{asset}_spot"]
     price = price.where(price > 0).dropna()
     r = development_only(np.log(price).diff().dropna(), HOLDOUT_START)
@@ -47,7 +50,7 @@ def forecasts(asset: str, h: int, panel: pd.DataFrame) -> pd.DataFrame:
     ovx0 = panel["ovx"].reindex(r.index)
     ovx1 = ovx0.shift(1)  # strict: yesterday's OVX at today's origin
     y = np.log(forward_realized_vol(r, h))
-    splits = expanding_splits(r.index, pd.Timestamp("2012-01-01"), h, 1)
+    splits = expanding_splits(r.index, pd.Timestamp("2012-01-01"), h, 1, window)
     base = har_design(r).join(leverage_design(r))
     X = {
         "lag0": base.join(har_design(r, ovx0)["log_ovx"]),

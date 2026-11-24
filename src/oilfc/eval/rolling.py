@@ -5,7 +5,11 @@ import pandas as pd
 
 
 def expanding_splits(
-    index: pd.DatetimeIndex, test_start: pd.Timestamp, h: int, refit_months: int
+    index: pd.DatetimeIndex,
+    test_start: pd.Timestamp,
+    h: int,
+    refit_months: int,
+    window: int | None = None,
 ) -> list[tuple[np.ndarray, np.ndarray]]:
     """Return (train_positions, test_positions) pairs of integer positions into `index`.
 
@@ -13,6 +17,8 @@ def expanding_splits(
     The training origins are the prefix of `index` whose target is known before the block starts:
     origin i has a target that reaches row i + h, so we keep i + h < first_test_position.
     Blocks that contain no origin are skipped.
+    window: if given, keep only the last `window` training origins (a rolling window of that many
+    rows, ending at the same last usable origin); None keeps every earlier origin (expanding window).
     """
     splits = []
     k = 0
@@ -23,5 +29,6 @@ def expanding_splits(
             return splits
         test = np.flatnonzero((index >= lo) & (index < hi))
         if len(test) > 0:
-            splits.append((np.arange(0, test[0] - h), test))
+            end = test[0] - h
+            splits.append((np.arange(0 if window is None else max(0, end - window), end), test))
         k += 1

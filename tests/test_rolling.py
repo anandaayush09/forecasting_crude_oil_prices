@@ -68,3 +68,23 @@ def test_first_test_origin_is_the_first_date_on_or_after_test_start():
 
 def test_no_splits_when_test_start_is_after_the_data():
     assert _splits(start="2030-01-01") == []
+
+
+def test_a_rolling_window_keeps_the_last_rows_and_the_same_gap():
+    from oilfc.eval.rolling import expanding_splits
+
+    full = _splits(h=22, months=1)
+    rolled = expanding_splits(INDEX, pd.Timestamp("2010-01-01"), 22, 1, window=504)
+    assert len(full) == len(rolled)
+    for (tr_full, te_full), (tr_roll, te_roll) in zip(full, rolled, strict=True):
+        assert len(tr_roll) == 504 and tr_roll[-1] == tr_full[-1]
+        assert tr_roll[0] == tr_full[-1] - 503
+        assert (te_full == te_roll).all()
+
+
+def test_a_window_longer_than_the_history_equals_the_expanding_window():
+    from oilfc.eval.rolling import expanding_splits
+
+    full = _splits(h=5, months=12)
+    big = expanding_splits(INDEX, pd.Timestamp("2010-01-01"), 5, 12, window=10**6)
+    assert all((a[0] == b[0]).all() for a, b in zip(full, big, strict=True))
