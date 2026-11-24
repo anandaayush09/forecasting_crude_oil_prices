@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
+import pytest
 
-from oilfc.features.exog import GROUPS, exogenous_features
+from oilfc.features.exog import GROUPS, exogenous_features, fx_features
 
 
 def _panel(n=400, seed=0):
@@ -63,3 +64,29 @@ def test_a_negative_front_price_gives_a_missing_slope_without_warnings():
         warnings.simplefilter("error")
         f = exogenous_features(p, p.index)
     assert np.isnan(f["fut_slope"].iloc[200]) and f["fut_slope"].drop(f.index[200]).notna().all()
+
+
+def _fx_panel(n=200, seed=1):
+    rng = np.random.default_rng(seed)
+    idx = pd.bdate_range("2020-01-01", periods=n)
+    return pd.DataFrame({"usd_broad": 110 * np.exp(np.cumsum(rng.normal(0, 0.002, n)))}, index=idx)
+
+
+def test_fx_features_match_their_definition():
+    p = _fx_panel()
+    f = fx_features(p, p.index)
+    t = 150
+    lu = np.log(p["usd_broad"])
+    assert f["usd_chg_22"].iloc[t] == pytest.approx(lu.iloc[t] - lu.iloc[t - 22])
+    d = lu.diff().iloc[t - 21 : t + 1]
+    assert f["log_usd_vol_22"].iloc[t] == pytest.approx(np.log(np.sqrt(252 * np.mean(d**2))))
+
+
+def test_fx_features_are_causal_and_a_flat_index_gives_missing_not_minus_infinity():
+    p = _fx_panel()
+    full = fx_features(p, p.index).iloc[:120]
+    changed = p.copy()
+    changed.iloc[120:] = 999.0
+    pd.testing.assert_frame_equal(full, fx_features(changed, changed.index).iloc[:120])
+    flat = pd.DataFrame({"usd_broad": 110.0}, index=p.index)
+    assert np.isnan(fx_features(flat, flat.index)["log_usd_vol_22"].iloc[100])

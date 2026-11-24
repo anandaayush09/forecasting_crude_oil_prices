@@ -16,6 +16,22 @@ GROUPS = {
 }
 
 
+def fx_features(panel: pd.DataFrame, index: pd.DatetimeIndex) -> pd.DataFrame:
+    """Exchange-rate channel from the broad US dollar index (`usd_broad`, already aligned to its release
+    date with a 5 business day lag, so every value is public by the origin).
+
+    usd_chg_22      22-day change in the log index.
+    log_usd_vol_22  log of the annualised volatility of its daily log changes over 22 days (NaN if zero).
+    """
+    usd = np.log(panel["usd_broad"].reindex(index).where(lambda s: s > 0))
+    daily = usd.diff()
+    vol = np.sqrt(252 * (daily**2).rolling(22).mean())
+    return pd.DataFrame(
+        {"usd_chg_22": usd - usd.shift(22), "log_usd_vol_22": np.log(vol.where(vol > 0))},
+        index=index,
+    )
+
+
 def exogenous_features(
     panel: pd.DataFrame, index: pd.DatetimeIndex, max_futures_age_days: int = 10
 ) -> pd.DataFrame:

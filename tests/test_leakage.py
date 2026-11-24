@@ -17,7 +17,7 @@ import pandas as pd
 import pytest
 
 from oilfc.eval.targets import past_realized_vol
-from oilfc.features.exog import exogenous_features
+from oilfc.features.exog import exogenous_features, fx_features
 from oilfc.features.vol import CHANNELS, daily_channels, lag_window
 from oilfc.models.baselines.vol import ewma_vol, har_design, leverage_design
 
@@ -39,6 +39,7 @@ def _data(seed=0):
             "crude_stocks": 400_000 + rng.normal(0, 1000, N),
             "gpr_daily": 100 + rng.uniform(0, 50, N),
             "epu_daily": 100 + rng.uniform(0, 50, N),
+            "usd_broad": 110 * np.exp(np.cumsum(rng.normal(0, 0.002, N))),
         },
         index=idx,
     )
@@ -65,6 +66,7 @@ FEATURES = {
     "daily_channels": lambda p, r: daily_channels(p, r),
     "lag_window": lambda p, r: lag_window(daily_channels(p, r), CHANNELS, 16),
     "exogenous_features": lambda p, r: exogenous_features(p, p.index),
+    "fx_features": lambda p, r: fx_features(p, p.index),
 }
 
 
