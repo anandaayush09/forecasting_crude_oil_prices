@@ -1,6 +1,5 @@
 """V5: expanding-origin splits with a gap. See docs/tasks/V5_rolling_splits.md.
 
-Marked xfail until you implement src/oilfc/eval/rolling.py. When all tests pass, delete the pytestmark line.
 
 expanding_splits(index, test_start, h, refit_months) -> list[tuple[np.ndarray, np.ndarray]]
   index:         DatetimeIndex of forecast origins (one per trading day)
