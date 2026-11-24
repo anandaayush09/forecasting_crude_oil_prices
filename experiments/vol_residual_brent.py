@@ -21,7 +21,7 @@ from sklearn.preprocessing import StandardScaler
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from oilfc.eval.holdout import development_only  # noqa: E402
+from oilfc.eval.holdout import assert_development_only, development_only  # noqa: E402
 from oilfc.eval.losses import mse_logvol, qlike  # noqa: E402
 from oilfc.eval.mcs import model_confidence_set  # noqa: E402
 from oilfc.eval.rolling import expanding_splits  # noqa: E402
@@ -43,6 +43,7 @@ FACTORIES = {
         subsample=0.8,
         subsample_freq=1,
         colsample_bytree=0.8,
+        random_state=0,
         min_child_samples=50,
         verbose=-1,
     ),
@@ -72,6 +73,7 @@ def main():
     panel.index = pd.to_datetime(panel.index)
     r = np.log(panel["brent_spot"]).diff().dropna()
     r = development_only(r, HOLDOUT_START)  # the clean holdout is never touched in development
+    assert_development_only(r.index, HOLDOUT_START)
     X = features(panel, r)
     h = 22
     y = np.log(forward_realized_vol(r, h))
