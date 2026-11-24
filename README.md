@@ -133,6 +133,7 @@ Verified on Windows: the test suite, lint, the offline data build and every expe
 ## Project stages
 
 - `v0.1.0`: first working volatility and risk benchmark (Brent and WTI ladders, filtered-simulation VaR/ES, residual models, evaluation library with holdout helpers).
+- `v0.2.0`: the headline result stated under strict OVX timing and checked for robustness (sub-periods, Holm correction, Bartlett variance, calibration, volatility targeting), a monthly-anchor rerun of the learned residuals (null), more data tests (futures, inventories, GPR, EPU, VIX, dollar index: null), leakage guards for every feature builder, the live forward test with a daily GitHub Actions run, a read-only API, and a green CI run.
 
 ## Live forward test
 
