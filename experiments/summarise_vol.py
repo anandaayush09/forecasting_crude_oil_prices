@@ -235,6 +235,21 @@ def robustness_summary() -> str:
             + md(wide)
             + nl
         )
+        if "dm_p_bartlett" in d:
+            d["pb"] = (
+                d["dm_p_bartlett"].round(3).astype(str)
+                + " / "
+                + d["dm_p_holm_bartlett"].round(3).astype(str)
+            )
+            wideb = d.pivot(index="cell", columns="benchmark", values="pb")
+            wideb.index.name = "Bartlett: raw p / Holm p"
+            blocks.append(
+                "**Same comparisons with a Bartlett-weighted variance (less noisy at 66 days)**"
+                + nl
+                + nl
+                + md(wideb)
+                + nl
+            )
     f = T / "robustness_calibration.csv"
     if f.exists():
         d = pd.read_csv(f)

@@ -333,6 +333,17 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 5d | 0.0 / 0.001 | 0.0 / 0.001 | 0.001 / 0.018 | 0.001 / 0.015 | 0.0 / 0.0 |
 | WTI 66d | 0.278 / 1.0 | 0.497 / 1.0 | 0.115 / 1.0 | 0.639 / 1.0 | 0.191 / 1.0 |
 
+**Same comparisons with a Bartlett-weighted variance (less noisy at 66 days)**
+
+| Bartlett: raw p / Holm p | garch_t | gjr_t | har_bc | lhar_bc | naive |
+|---|---|---|---|---|---|
+| BRENT 22d | 0.0 / 0.007 | 0.002 / 0.032 | 0.03 / 0.296 | 0.005 / 0.075 | 0.0 / 0.0 |
+| BRENT 5d | 0.0 / 0.0 | 0.0 / 0.0 | 0.0 / 0.004 | 0.0 / 0.0 | 0.0 / 0.0 |
+| BRENT 66d | 0.855 / 1.0 | 0.728 / 1.0 | 0.862 / 1.0 | 0.566 / 1.0 | 0.0 / 0.009 |
+| WTI 22d | 0.007 / 0.1 | 0.003 / 0.055 | 0.02 / 0.224 | 0.014 / 0.166 | 0.01 / 0.133 |
+| WTI 5d | 0.0 / 0.0 | 0.0 / 0.0 | 0.0 / 0.002 | 0.0 / 0.001 | 0.0 / 0.0 |
+| WTI 66d | 0.455 / 1.0 | 0.566 / 1.0 | 0.477 / 1.0 | 0.826 / 1.0 | 0.135 / 1.0 |
+
 **Calibration (log-log Mincer-Zarnowitz, Newey-West)**
 
 | slope / mean log(y/f); * = rejects slope 1, intercept 0 | garch_t | gjr_t | har_bc | lhar_bc | lhar_ovx_bc_lag1 | naive | ovx_raw_lag1 |

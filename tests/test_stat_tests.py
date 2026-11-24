@@ -101,3 +101,59 @@ def test_too_few_pairs_for_the_horizon_is_an_error():
     x = np.arange(10, dtype=float)
     with pytest.raises(ValueError, match="usable pairs"):
         dm_hln(x, x + 1, 5)
+
+
+def test_bartlett_kernel_for_h_equal_1_is_the_plain_t_statistic():
+    from oilfc.eval.stat_tests import dm_hln
+
+    rng = np.random.default_rng(3)
+    a = rng.normal(0.1, 1.0, 400)
+    b = np.zeros(400)
+    stat, p = dm_hln(a, b, 1, kernel="bartlett")
+    d = a - b
+    expected = d.mean() / np.sqrt(np.mean((d - d.mean()) ** 2) / len(d))
+    assert stat == pytest.approx(expected)
+    assert 0 < p < 1
+
+
+def test_bartlett_stays_defined_where_the_rectangular_variance_goes_non_positive():
+    from oilfc.eval.stat_tests import dm_hln
+
+    t = np.arange(600)
+    d = np.cos(2 * np.pi * t / 30) + 0.05 * np.random.default_rng(1).normal(size=600) + 0.01
+    assert np.isnan(dm_hln(d, np.zeros(600), 22)[0])  # rectangular: variance <= 0
+    stat, p = dm_hln(d, np.zeros(600), 22, kernel="bartlett")
+    assert np.isfinite(stat) and 0 <= p <= 1
+
+
+def test_bartlett_and_rectangular_agree_in_sign_and_scale_for_overlapping_differences():
+    from oilfc.eval.stat_tests import dm_hln
+
+    rng = np.random.default_rng(5)
+    e = rng.normal(0, 1, 1500)
+    d = np.convolve(e, np.ones(22) / 22, mode="valid") + 0.05  # overlap of 22 like a 22-day target
+    rect = dm_hln(d, np.zeros(len(d)), 22)
+    bart = dm_hln(d, np.zeros(len(d)), 22, kernel="bartlett")
+    assert np.sign(rect[0]) == np.sign(bart[0])
+    assert 0.5 < bart[0] / rect[0] < 2.0
+
+
+def test_unknown_kernel_is_rejected():
+    from oilfc.eval.stat_tests import dm_hln
+
+    with pytest.raises(ValueError):
+        dm_hln(np.arange(50.0), np.zeros(50), 1, kernel="parzen")
+
+
+def test_bartlett_weights_match_a_hand_computation_for_h_equal_3():
+    from oilfc.eval.stat_tests import dm_hln
+
+    d = np.array([1.0, 2.0, 0.5, 3.0, 2.0, 1.5, 2.5, 0.0, 1.0, 2.0, 3.0, 1.0])
+    n, h = len(d), 3
+    dbar = d.mean()
+    g = [np.mean((d[k:] - dbar) * (d[: n - k] - dbar)) for k in range(h)]
+    var = (g[0] + 2 * ((2 / 3) * g[1] + (1 / 3) * g[2])) / n
+    expected = dbar / np.sqrt(var)
+    stat, p = dm_hln(d, np.zeros(n), h, kernel="bartlett")
+    assert stat == pytest.approx(expected)
+    assert p == pytest.approx(2 * (1 - stats.t.cdf(abs(expected), n - 1)))
