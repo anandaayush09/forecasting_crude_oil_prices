@@ -7,6 +7,7 @@
 | naive | 0.4409 | 0.0 |  | 0.02 | 0.0 |  |
 | ewma | 0.44 | 0.2 | 0.934 | 0.014 | -6.6 |  |
 | har | 0.528 | -19.8 | 0.015 | 0.0 | 8.6 |  |
+| har_bc | 0.4304 | 2.4 | 0.581 | 0.006 | -12.7 |  |
 | lhar_bc | 0.4123 | 6.5 | 0.039 | 0.102 | -11.3 |  |
 | ovx_raw | 0.3971 | 9.9 | 0.186 | 0.015 | -18.2 |  |
 | ovx_bc | 0.373 | 15.4 | 0.02 |  | 8.7 | yes |
@@ -22,6 +23,7 @@
 | naive | 0.3723 | 0.0 |  | 0.0 | 0.0 |  |
 | ewma | 0.3433 | 7.8 | 0.168 | 0.002 | -1.4 |  |
 | har | 0.3621 | 2.8 | 0.856 | 0.062 | 12.2 | yes |
+| har_bc | 0.3243 | 12.9 | 0.206 | 0.031 | 1.5 |  |
 | lhar_bc | 0.3002 | 19.4 | 0.006 | 0.008 | 3.6 |  |
 | ovx_raw | 0.2458 | 34.0 | 0.004 | 0.806 | 12.0 | yes |
 | ovx_bc | 0.2518 | 32.4 | 0.0 |  | 29.7 | yes |
@@ -37,6 +39,7 @@
 | naive | 0.8414 | 0.0 |  | 0.0 | 0.0 |  |
 | ewma | 0.795 | 5.5 | 0.011 | 0.009 | 6.7 |  |
 | har | 0.7 | 16.8 | 0.0 | 0.139 | 26.4 | yes |
+| har_bc | 0.6135 | 27.1 | 0.019 | 0.819 | 19.8 | yes |
 | lhar_bc | 0.5937 | 29.4 | 0.031 | 0.655 | 20.4 | yes |
 | ovx_raw | 0.5388 | 36.0 | 0.032 | 0.356 | 31.4 | yes |
 | ovx_bc | 0.6261 | 25.6 | 0.0 |  | 36.6 | yes |
@@ -52,6 +55,7 @@
 | naive | 0.4875 | 0.0 |  | 0.02 | 0.0 |  |
 | ewma | 0.4697 | 3.7 | 0.219 | 0.029 | -6.7 |  |
 | har | 0.5558 | -14.0 | 0.047 | 0.002 | 10.3 |  |
+| har_bc | 0.4523 | 7.2 | 0.1 | 0.045 | -11.3 |  |
 | lhar_bc | 0.428 | 12.2 | 0.001 | 0.319 | -9.6 |  |
 | ovx_raw | 0.405 | 16.9 | 0.07 | 0.49 | -0.5 | yes |
 | ovx_bc | 0.3955 | 18.9 | 0.02 |  | 9.7 | yes |
@@ -67,6 +71,7 @@
 | naive | 0.5387 | 0.0 |  | 0.054 | 0.0 | yes |
 | ewma | 0.5032 | 6.6 | 0.084 | 0.096 | -2.4 | yes |
 | har | 0.4859 | 9.8 | 0.181 | 0.172 | 15.7 | yes |
+| har_bc | 0.4262 | 20.9 | 0.048 | 0.114 | 2.6 | yes |
 | lhar_bc | 0.3955 | 26.6 | 0.036 | 0.123 | 5.0 | yes |
 | ovx_raw | 0.3012 | 44.1 | 0.052 | 0.242 | 28.2 | yes |
 | ovx_bc | 0.3157 | 41.4 | 0.054 |  | 30.0 | yes |
@@ -82,6 +87,7 @@
 | naive | 1.4029 | 0.0 |  | 0.208 | 0.0 | yes |
 | ewma | 1.2882 | 8.2 | 0.056 | 0.242 | 5.2 | yes |
 | har | 1.0013 | 28.6 | 0.121 | 0.341 | 27.4 | yes |
+| har_bc | 0.8573 | 38.9 | 0.198 | 0.319 | 18.0 | yes |
 | lhar_bc | 0.8304 | 40.8 | 0.203 | 0.352 | 18.7 | yes |
 | ovx_raw | 0.7535 | 46.3 | 0.195 | 0.838 | 36.3 | yes |
 | ovx_bc | 0.7573 | 46.0 | 0.208 |  | 33.8 | yes |
@@ -148,7 +154,127 @@
 
 | model | qlike | mse_logvol | mse_gain_vs_anchor_pct | qlike_gain_vs_anchor_pct | dm_p_mse_vs_anchor | dm_p_qlike_vs_anchor | mean_alpha | share_alpha_zero | mcs_pvalue | in_set |
 |---|---|---|---|---|---|---|---|---|---|---|
-| ridge | 0.2467 | 0.1165 | -4.22 | 4.9449 | 0.3774 | 0.4261 | 0.6531 | 0.2695 | 1.0 | True |
-| lgbm | 0.2557 | 0.1154 | -3.297 | 1.458 | 0.3526 | 0.6247 | 0.6204 | 0.0922 | 0.585 | True |
-| mlp | 0.2658 | 0.1243 | -11.2776 | -2.4324 | 0.2094 | 0.537 | 0.278 | 0.1659 | 0.42 | True |
-| anchor_har_ovx | 0.2595 | 0.1117 | 0.0 | 0.0 |  |  |  |  | 0.585 | True |
+| ridge | 0.2467 | 0.1165 | -4.0817 | 5.049 | 0.3895 | 0.4157 | 0.6531 | 0.2695 | 1.0 | True |
+| lgbm | 0.256 | 0.116 | -3.6537 | 1.4537 | 0.3093 | 0.645 | 0.6369 | 0.0802 | 0.575 | True |
+| mlp | 0.2669 | 0.1202 | -7.4102 | -2.7596 | 0.1469 | 0.4739 | 0.2765 | 0.2332 | 0.382 | True |
+| anchor_har_ovx | 0.2598 | 0.1119 | 0.0 | 0.0 |  |  |  |  | 0.575 | True |
+
+**New data groups added to leverage HAR + OVX**
+
+Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 2012-01 to 2024-04 (EIA stopped publishing futures prices after 2024-04-05). Base: leverage HAR + OVX, QLIKE-corrected. Gains are against that base; significance is Diebold-Mariano p < 0.05.
+
+| asset | horizon | sample | n | best QLIKE gain % | worst QLIKE gain % | QLIKE significantly better | QLIKE significantly worse | MSE(logvol) significantly better |
+|---|---|---|---|---|---|---|---|---|
+| brent | 5 | A | 3413 | -0.20 (+gpr) | -1.75 (+all) | none | none | none |
+| brent | 5 | B | 3112 | -0.27 (+gpr) | -2.54 (+all) | none | +all | +futures |
+| brent | 22 | A | 3396 | -1.24 (+gpr) | -4.04 (+all) | none | +vix | none |
+| brent | 22 | B | 3112 | -0.47 (+epu) | -3.98 (+all) | none | +vix | none |
+| brent | 66 | A | 3352 | +1.70 (+vix) | -2.38 (+epu) | none | none | none |
+| brent | 66 | B | 3112 | +1.79 (+vix) | -2.12 (+epu) | none | none | none |
+| wti | 5 | A | 3329 | -0.33 (+gpr) | -0.89 (+all) | none | none | +epu, +all |
+| wti | 5 | B | 3039 | +0.56 (+epu) | -0.94 (+all) | none | none | +epu, +all |
+| wti | 22 | A | 3312 | +0.74 (+epu) | -1.73 (+inventories) | none | +inventories | none |
+| wti | 22 | B | 3039 | +1.44 (+epu) | -1.87 (+inventories) | none | +inventories | none |
+| wti | 66 | A | 3268 | +1.99 (+gpr) | -1.56 (+all) | none | none | none |
+| wti | 66 | B | 3039 | +2.11 (+gpr) | -0.61 (+epu) | none | none | none |
+
+**BRENT, 5-day, OVX timing (n = 3413)**
+
+| model | QLIKE | gain vs naive % | p vs naive | p: better than leverage HAR | p: better than HAR | p: better than GARCH-t | p: better than GJR-t | in 90% MCS |
+|---|---|---|---|---|---|---|---|---|
+| naive | 0.4409 | 0.0 |  | 0.039 | 0.581 | 0.206 | 0.12 |  |
+| har_bc | 0.4304 | 2.4 | 0.581 | 0.13 |  | 0.571 | 0.405 |  |
+| lhar_bc | 0.4123 | 6.5 | 0.039 |  | 0.13 | 0.033 | 0.345 |  |
+| ovx_bc_lag0 | 0.373 | 15.4 | 0.02 | 0.102 | 0.006 | 0.037 | 0.052 | yes |
+| lhar_ovx_bc_lag0 | 0.3626 | 17.7 | 0.0 | 0.0 | 0.001 | 0.0 | 0.0 | yes |
+| ovx_bc_lag1 | 0.3884 | 11.9 | 0.089 | 0.36 | 0.045 | 0.184 | 0.248 |  |
+| lhar_ovx_bc_lag1 | 0.3698 | 16.1 | 0.0 | 0.0 | 0.002 | 0.0 | 0.0 |  |
+| ovx_raw_lag0 | 0.3971 | 9.9 | 0.186 | 0.557 | 0.153 | 0.314 | 0.392 |  |
+| ovx_raw_lag1 | 0.4087 | 7.3 | 0.346 | 0.894 | 0.349 | 0.593 | 0.717 |  |
+
+**BRENT, 22-day, OVX timing (n = 3396)**
+
+| model | QLIKE | gain vs naive % | p vs naive | p: better than leverage HAR | p: better than HAR | p: better than GARCH-t | p: better than GJR-t | in 90% MCS |
+|---|---|---|---|---|---|---|---|---|
+| naive | 0.3723 | 0.0 |  | 0.006 | 0.206 | 0.047 | 0.024 |  |
+| har_bc | 0.3243 | 12.9 | 0.206 | 0.289 |  | 0.735 | 0.604 |  |
+| lhar_bc | 0.3002 | 19.4 | 0.006 |  | 0.289 | 0.16 | 0.772 |  |
+| ovx_bc_lag0 | 0.2518 | 32.4 | 0.0 | 0.008 | 0.031 | 0.005 | 0.037 | yes |
+| lhar_ovx_bc_lag0 | 0.2457 | 34.0 | 0.0 | 0.01 | 0.059 | 0.001 | 0.003 | yes |
+| ovx_bc_lag1 | 0.265 | 28.8 | 0.002 | 0.045 | 0.033 | 0.038 | 0.173 | yes |
+| lhar_ovx_bc_lag1 | 0.2516 | 32.4 | 0.0 | 0.011 | 0.066 | 0.002 | 0.007 |  |
+| ovx_raw_lag0 | 0.2458 | 34.0 | 0.004 | 0.078 | 0.106 | 0.019 | 0.019 | yes |
+| ovx_raw_lag1 | 0.2559 | 31.3 | 0.004 | 0.086 | 0.109 | 0.019 | 0.032 | yes |
+
+**BRENT, 66-day, OVX timing (n = 3352)**
+
+| model | QLIKE | gain vs naive % | p vs naive | p: better than leverage HAR | p: better than HAR | p: better than GARCH-t | p: better than GJR-t | in 90% MCS |
+|---|---|---|---|---|---|---|---|---|
+| naive | 0.8414 | 0.0 |  | 0.031 | 0.019 | 0.099 | 0.108 |  |
+| har_bc | 0.6135 | 27.1 | 0.019 | 0.309 |  | 0.897 | 0.716 | yes |
+| lhar_bc | 0.5937 | 29.4 | 0.031 |  | 0.309 | 0.587 | 0.986 | yes |
+| ovx_bc_lag0 | 0.6261 | 25.6 | 0.0 | 0.655 | 0.819 | 0.854 | 0.768 | yes |
+| lhar_ovx_bc_lag0 | 0.6142 | 27.0 | 0.001 | 0.666 | 0.98 | 0.933 | 0.81 | yes |
+| ovx_bc_lag1 | 0.6434 | 23.5 | 0.0 | 0.562 | 0.659 | 0.751 | 0.687 | yes |
+| lhar_ovx_bc_lag1 | 0.6201 | 26.3 | 0.001 | 0.601 | 0.84 | 0.876 | 0.766 | yes |
+| ovx_raw_lag0 | 0.5388 | 36.0 | 0.032 | 0.085 | 0.127 | 0.034 | 0.109 | yes |
+| ovx_raw_lag1 | 0.5551 | 34.0 | 0.025 | 0.072 | 0.108 | 0.105 | 0.331 | yes |
+
+**WTI, 5-day, OVX timing (n = 3329)**
+
+| model | QLIKE | gain vs naive % | p vs naive | p: better than leverage HAR | p: better than HAR | p: better than GARCH-t | p: better than GJR-t | in 90% MCS |
+|---|---|---|---|---|---|---|---|---|
+| naive | 0.4875 | 0.0 |  | 0.001 | 0.1 | 0.012 | 0.01 |  |
+| har_bc | 0.4523 | 7.2 | 0.1 | 0.088 |  | 0.314 | 0.236 |  |
+| lhar_bc | 0.428 | 12.2 | 0.001 |  | 0.088 | 0.093 | 0.325 |  |
+| ovx_bc_lag0 | 0.3955 | 18.9 | 0.02 | 0.319 | 0.045 | 0.126 | 0.148 | yes |
+| lhar_ovx_bc_lag0 | 0.3688 | 24.3 | 0.0 | 0.001 | 0.001 | 0.0 | 0.0 | yes |
+| ovx_bc_lag1 | 0.4055 | 16.8 | 0.024 | 0.441 | 0.062 | 0.183 | 0.223 |  |
+| lhar_ovx_bc_lag1 | 0.3762 | 22.8 | 0.0 | 0.001 | 0.001 | 0.0 | 0.0 |  |
+| ovx_raw_lag0 | 0.405 | 16.9 | 0.07 | 0.548 | 0.121 | 0.303 | 0.349 | yes |
+| ovx_raw_lag1 | 0.4127 | 15.3 | 0.075 | 0.657 | 0.138 | 0.367 | 0.431 | yes |
+
+**WTI, 22-day, OVX timing (n = 3312)**
+
+| model | QLIKE | gain vs naive % | p vs naive | p: better than leverage HAR | p: better than HAR | p: better than GARCH-t | p: better than GJR-t | in 90% MCS |
+|---|---|---|---|---|---|---|---|---|
+| naive | 0.5387 | 0.0 |  | 0.036 | 0.048 | 0.061 | 0.073 | yes |
+| har_bc | 0.4262 | 20.9 | 0.048 | 0.232 |  | 0.792 | 0.627 | yes |
+| lhar_bc | 0.3955 | 26.6 | 0.036 |  | 0.232 | 0.021 | 0.124 | yes |
+| ovx_bc_lag0 | 0.3157 | 41.4 | 0.054 | 0.123 | 0.114 | 0.083 | 0.072 | yes |
+| lhar_ovx_bc_lag0 | 0.3032 | 43.7 | 0.034 | 0.05 | 0.075 | 0.033 | 0.021 | yes |
+| ovx_bc_lag1 | 0.3327 | 38.3 | 0.048 | 0.126 | 0.103 | 0.079 | 0.072 | yes |
+| lhar_ovx_bc_lag1 | 0.3111 | 42.3 | 0.032 | 0.046 | 0.073 | 0.03 | 0.017 | yes |
+| ovx_raw_lag0 | 0.3012 | 44.1 | 0.052 | 0.094 | 0.095 | 0.067 | 0.054 | yes |
+| ovx_raw_lag1 | 0.3166 | 41.2 | 0.046 | 0.084 | 0.082 | 0.057 | 0.046 | yes |
+
+**WTI, 66-day, OVX timing (n = 3268)**
+
+| model | QLIKE | gain vs naive % | p vs naive | p: better than leverage HAR | p: better than HAR | p: better than GARCH-t | p: better than GJR-t | in 90% MCS |
+|---|---|---|---|---|---|---|---|---|
+| naive | 1.4029 | 0.0 |  | 0.203 | 0.198 | 0.229 | 0.23 | yes |
+| har_bc | 0.8573 | 38.9 | 0.198 | 0.277 |  | 0.968 | 0.783 | yes |
+| lhar_bc | 0.8304 | 40.8 | 0.203 |  | 0.277 | 0.082 | 0.359 | yes |
+| ovx_bc_lag0 | 0.7573 | 46.0 | 0.208 | 0.352 | 0.319 | 0.226 | 0.24 | yes |
+| lhar_ovx_bc_lag0 | 0.8118 | 42.1 | 0.192 | 0.293 | 0.147 | 0.151 | 0.296 | yes |
+| ovx_bc_lag1 | 0.7767 | 44.6 | 0.207 | 0.417 | 0.351 | 0.257 | 0.285 | yes |
+| lhar_ovx_bc_lag1 | 0.8225 | 41.4 | 0.191 | 0.639 | 0.115 | 0.278 | 0.497 | yes |
+| ovx_raw_lag0 | 0.7535 | 46.3 | 0.195 | 0.228 | 0.227 | 0.137 | 0.144 | yes |
+| ovx_raw_lag1 | 0.7769 | 44.6 | 0.194 | 0.276 | 0.242 | 0.161 | 0.187 | yes |
+
+**Kaggle residual models vs monthly leverage HAR + OVX (same origins; gain > 0: model better)**
+
+| asset | horizon | n | model | qlike_model | qlike_benchmark | gain_vs_benchmark_pct | dm_p |
+|---|---|---|---|---|---|---|---|
+| brent | 5 | 3413 | transformer_seq | 0.3666 | 0.3626 | -1.0892 | 0.767 |
+| brent | 5 | 3413 | mlp_seq | 0.3747 | 0.3626 | -3.3441 | 0.2485 |
+| brent | 5 | 3413 | ridge_window | 0.3675 | 0.3626 | -1.3513 | 0.6093 |
+| brent | 5 | 3413 | anchor_har_ovx_bc | 0.3763 | 0.3626 | -3.7885 | 0.2971 |
+| brent | 22 | 3396 | transformer_seq | 0.26 | 0.2457 | -5.8258 | 0.3994 |
+| brent | 22 | 3396 | mlp_seq | 0.2599 | 0.2457 | -5.7761 | 0.2345 |
+| brent | 22 | 3396 | ridge_window | 0.259 | 0.2457 | -5.4264 | 0.3044 |
+| brent | 22 | 3396 | anchor_har_ovx_bc | 0.257 | 0.2457 | -4.6146 | 0.3823 |
+| wti | 22 | 3312 | transformer_seq | 0.3407 | 0.3032 | -12.3585 | 0.0118 |
+| wti | 22 | 3312 | mlp_seq | 0.3461 | 0.3032 | -14.1512 | 0.0042 |
+| wti | 22 | 3312 | ridge_window | 0.3331 | 0.3032 | -9.8752 | 0.0221 |
+| wti | 22 | 3312 | anchor_har_ovx_bc | 0.3389 | 0.3032 | -11.7882 | 0.0163 |
