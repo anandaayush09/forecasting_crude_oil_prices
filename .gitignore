@@ -24,3 +24,6 @@ prior_work/ddp
 # built upload bundles for Kaggle (rebuild with kaggle/build_upload.py)
 kaggle/*.zip
 results/kaggle_residual/*.zip
+
+# third-party papers are not redistributed: keep local copies out of the repository
+literature/*.pdf
