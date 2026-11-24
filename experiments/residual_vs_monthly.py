@@ -1,11 +1,13 @@
 """Compare the Kaggle residual models with benchmarks refit monthly (the like-for-like check).
 
-    .venv/Scripts/python.exe experiments/residual_vs_monthly.py
+    .venv/Scripts/python.exe experiments/residual_vs_monthly.py [results_folder]
 
 The deep-model pipeline refits yearly (the anchor too), the benchmark ladder monthly. This script scores
 the saved Kaggle predictions (results/kaggle_residual/vol_residual_seq_predictions_*.csv) and the monthly
-HAR + OVX and leverage HAR + OVX forecasts on exactly the same origins. Writes
-results/tables/residual_vs_monthly_benchmarks.csv.
+HAR + OVX and leverage HAR + OVX forecasts on exactly the same origins. For the HAR + OVX benchmark it
+also scores each residual model's saved correction added to the benchmark itself (`*_on_benchmark_anchor`). results_folder
+defaults to kaggle_residual (yearly anchor); pass kaggle_residual_monthly for the monthly-anchor rerun.
+Writes results/tables/residual_vs_monthly_benchmarks.csv (or ..._<folder>.csv for another folder).
 """
 
 import sys
@@ -33,12 +35,12 @@ LEV = ["neg_ret_1", "neg_ret_5", "neg_ret_22"]
 RUNS = (("brent", 5), ("brent", 22), ("wti", 22))
 
 
-def main():
+def main(folder="kaggle_residual"):
     panel = pd.read_parquet(ROOT / "data" / "processed" / "panel_daily.parquet")
     panel.index = pd.to_datetime(panel.index)
     rows = []
     for asset, h in RUNS:
-        f = ROOT / "results" / "kaggle_residual" / f"vol_residual_seq_predictions_{asset}_{h}d.csv"
+        f = ROOT / "results" / folder / f"vol_residual_seq_predictions_{asset}_{h}d.csv"
         pred = pd.read_csv(f, index_col=0, parse_dates=True)
         price = panel[f"{asset}_spot"]
         price = price.where(price > 0).dropna()
@@ -69,11 +71,29 @@ def main():
                     "gain_vs_benchmark_pct": 100 * (1 - qm.mean() / qb.mean()),
                     "dm_p": dm_hln(qb, qm, h)[1],
                 })  # fmt: skip
+            if name == "har_ovx_bc_monthly":
+                # the saved correction (log forecast minus log anchor) added to the monthly benchmark
+                # itself, so the anchor's calibration is the benchmark's own (not the pipeline's)
+                for m in ("transformer_seq", "mlp_seq", "ridge_window"):
+                    moved = np.exp(
+                        np.log(d["bench"]) + np.log(d[m]) - np.log(d["anchor_har_ovx_bc"])
+                    )
+                    qm = qlike(d["y"], moved)
+                    rows.append({
+                        "asset": asset, "horizon": h, "n": len(d), "benchmark": name,
+                        "model": f"{m}_on_benchmark_anchor", "qlike_model": qm.mean(),
+                        "qlike_benchmark": qb.mean(),
+                        "gain_vs_benchmark_pct": 100 * (1 - qm.mean() / qb.mean()),
+                        "dm_p": dm_hln(qb, qm, h)[1],
+                    })  # fmt: skip
     out = pd.DataFrame(rows)
-    out.to_csv(ROOT / "results" / "tables" / "residual_vs_monthly_benchmarks.csv", index=False)
+    suffix = "" if folder == "kaggle_residual" else f"_{folder}"
+    out.to_csv(
+        ROOT / "results" / "tables" / f"residual_vs_monthly_benchmarks{suffix}.csv", index=False
+    )
     pd.set_option("display.width", 220)
     print(out.round(4).to_string(index=False))
 
 
 if __name__ == "__main__":
-    main()
+    main(*sys.argv[1:2])

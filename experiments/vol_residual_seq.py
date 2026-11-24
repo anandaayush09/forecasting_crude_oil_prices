@@ -2,13 +2,15 @@
 
     python experiments/vol_residual_seq.py                       # Brent, 22-day volatility, auto device
     python experiments/vol_residual_seq.py --device cuda --seeds 5
-    python experiments/vol_residual_seq.py --smoke               # 2 splits, 1 seed, 5 epochs (CPU check)
+    python experiments/vol_residual_seq.py --smoke               # 13 monthly splits (2 residual refits), 1 seed, 5 epochs
 
 Anchor: HAR + OVX regression on log volatility with the QLIKE variance correction. Residual models
 see the last `seq_len` days of six channels and predict what the anchor misses; alpha (chosen on a
 time-ordered validation block) shrinks the correction. Models: ridge on the flattened window (linear
 control), a flat MLP (attention-free control) and a patch transformer, with similar parameter counts.
-Protocol: expanding window, deep-model refits yearly, gap = horizon, test from 2012-01.
+Protocol: expanding window, anchor refit monthly (as the benchmark ladder), residual models refit
+every 12 months (--residual-every), training origins stop h + 1 rows before the first test origin,
+test from 2012-01.
 """
 
 import argparse
@@ -52,7 +54,13 @@ def main():
     ap.add_argument("--asset", default="brent", choices=["brent", "wti"])
     ap.add_argument("--h", type=int, default=22)
     ap.add_argument("--device", default="auto")
-    ap.add_argument("--refit-months", type=int, default=12)
+    ap.add_argument("--refit-months", type=int, default=1, help="anchor refit frequency")
+    ap.add_argument(
+        "--residual-every",
+        type=int,
+        default=12,
+        help="residual models refit every this many splits (12 = yearly with monthly splits)",
+    )
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--epochs", type=int, default=80)
     ap.add_argument("--seq-len", type=int, default=64)
@@ -83,8 +91,12 @@ def main():
     y = np.log(forward_realized_vol(r, a.h))
     splits = expanding_splits(r.index, pd.Timestamp(a.test_start), a.h, a.refit_months)
     if a.smoke:
-        splits = splits[:2]
-    print(f"{len(splits)} refits; {len(window.columns)} window columns", flush=True)
+        splits = splits[: a.residual_every + 1]  # two residual refits
+    print(
+        f"{len(splits)} anchor refits, residual models every {a.residual_every}; "
+        f"{len(window.columns)} window columns",
+        flush=True,
+    )
 
     deep = dict(
         seq_len=a.seq_len, n_channels=len(CHANNELS), epochs=epochs, seeds=seeds, device=device
@@ -102,7 +114,8 @@ def main():
     for name, factory in factories.items():
         t0 = time.time()
         res = residual_forecast(X, y, splits, ANCHOR, list(window.columns), factory,
-                                variance_correction=True)  # fmt: skip
+                                variance_correction=True,
+                                residual_refit_every=a.residual_every)  # fmt: skip
         preds[name], alphas[name], anchor = res["pred"], res["alpha"].dropna(), res["anchor"]
         seconds[name] = time.time() - t0
         print(
@@ -133,8 +146,8 @@ def main():
         from oilfc.eval.mcs import model_confidence_set
 
         table = table.join(model_confidence_set(ql, block_size=a.h))
-    except ImportError:
-        print("arch not installed: skipping the Model Confidence Set")
+    except (ImportError, RuntimeError) as e:  # keep the other results if the MCS cannot run
+        print(f"skipping the Model Confidence Set: {e}")
 
     # attention vs no attention, head to head (RQ4)
     table.attrs["transformer_vs_mlp_qlike_dm_p"] = dm_hln(
