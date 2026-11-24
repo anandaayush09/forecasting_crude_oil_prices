@@ -1,0 +1,39 @@
+{
+ "content": {
+  "asset": "wti",
+  "code_version": "35816847ef8da352d47340a378f76acf59c8aa56",
+  "horizons": {
+   "22": {
+    "garch_t": 0.51614373,
+    "gjr_t": 0.52690967,
+    "har_bc": 0.50102314,
+    "lhar_bc": 0.50275727,
+    "lhar_ovx_bc_lag1": 0.46587185,
+    "naive": 0.52762993
+   },
+   "5": {
+    "garch_t": 0.51680479,
+    "gjr_t": 0.5299389,
+    "har_bc": 0.50342723,
+    "lhar_bc": 0.5047032,
+    "lhar_ovx_bc_lag1": 0.47663994,
+    "naive": 0.52762993
+   },
+   "66": {
+    "garch_t": 0.51272487,
+    "gjr_t": 0.5180414,
+    "har_bc": 0.51335705,
+    "lhar_bc": 0.51058479,
+    "lhar_ovx_bc_lag1": 0.47669344,
+    "naive": 0.52762993
+   }
+  },
+  "n_returns": 8438,
+  "origin_date": "2026-11-17",
+  "ovx_date_used": "2026-11-16",
+  "ovx_value_used": 49.59,
+  "run_utc": "2026-11-24T13:28:43Z",
+  "spec_version": "1"
+ },
+ "sha256": "2fba9e95dc6204399e62bb714df3289f87a282e0cca4cd91508ea9293c13e8d6"
+}
