@@ -13,6 +13,7 @@ Python 3.12, pandas, numpy, scipy, statsmodels, arch, scikit-learn, LightGBM, Py
 - Lint: `python -m ruff check . && python -m ruff format --check .`
 - Results summary: `python experiments/summarise_vol.py`
 - Live forecasts: run daily by `.github/workflows/live.yml` (the bot pushes to main: `git pull --rebase` before you push). By hand: `python experiments/live_run.py`, commit `live/forecasts` at once, then `python experiments/live_score.py` (see `live/README.md`; forecast files are never edited or overwritten)
+- Holdout (once, after the freeze): `python experiments/holdout_final.py` is a dry run; only the owner runs it with `--confirm-single-run`, and it refuses to overwrite `results/holdout/holdout_v1.json`. Never run it in development.
 - API: `python -m uvicorn oilfc.api.app:app` (read-only, spec in `docs/api_spec.md`)
 
 ## Layout
