@@ -171,11 +171,12 @@ def kaggle_monthly_summary() -> str:
                     "cell": f"{asset.upper()} {h}d",
                     "model": m,
                     "gain vs own anchor %": round(d.loc[m, "qlike_gain_vs_anchor_pct"], 2),
-                    "p": round(d.loc[m, "dm_p_qlike_vs_anchor"], 3),
+                    "p": d.loc[m, "dm_p_qlike_vs_anchor"],
                 }
             )
     t = pd.DataFrame(rows)
     t["Holm p (9 tests)"] = holm_adjust(t["p"].to_numpy()).round(3)
+    t["p"] = t["p"].round(3)
     f = T / "residual_vs_monthly_benchmarks_kaggle_residual_monthly.csv"
     if f.exists():
         g = pd.read_csv(f)
@@ -183,12 +184,74 @@ def kaggle_monthly_summary() -> str:
         g["model"] = g["model"].str.replace("_on_benchmark_anchor", "")
         g["cell"] = g["asset"].str.upper() + " " + g["horizon"].astype(str) + "d"
         g = g.set_index(["cell", "model"])
-        keys = list(zip(t["cell"], t["model"]))
-        t["gain added to monthly HAR+OVX %"] = [round(g.loc[k, "gain_vs_benchmark_pct"], 2) for k in keys]
+        keys = list(zip(t["cell"], t["model"], strict=True))
+        t["gain added to monthly HAR+OVX %"] = [
+            round(g.loc[k, "gain_vs_benchmark_pct"], 2) for k in keys
+        ]
         t["p (added)"] = [round(g.loc[k, "dm_p"], 3) for k in keys]
     t = t.set_index("cell")
-    title = "**Residual models, monthly-anchor Kaggle rerun (QLIKE gain; > 0: residual model better)**"
+    title = (
+        "**Residual models, monthly-anchor Kaggle rerun (QLIKE gain; > 0: residual model better)**"
+    )
     return title + nl + nl + md(t) + nl
+
+
+def robustness_summary() -> str:
+    """Sub-periods, Holm-corrected p-values and calibration of the strict-timing headline."""
+    nl = chr(10)
+    blocks = []
+    f = T / "robustness_periods.csv"
+    if f.exists():
+        d = pd.read_csv(f)
+        wide = d.pivot_table(
+            index=["asset", "horizon", "period"], columns="benchmark", values="dm_p_headline_better"
+        ).round(3)
+        wide.columns = [f"p vs {c}" for c in wide.columns]
+        gain = d[d["benchmark"] == "naive"].set_index(["asset", "horizon", "period"])
+        wide.insert(0, "gain vs naive %", gain["gain_vs_benchmark_pct"].round(1))
+        wide.insert(0, "n", gain["n"])
+        wide = wide.reset_index()
+        wide["asset"] = wide["asset"].str.upper()
+        wide = wide.set_index("asset")
+        blocks.append(
+            "**Headline (leverage HAR + OVX(t-1)) by sample: gain over naive and Diebold-Mariano p"
+            " that it beats each benchmark**" + nl + nl + md(wide) + nl
+        )
+    f = T / "robustness_holm.csv"
+    if f.exists():
+        d = pd.read_csv(f)
+        d["cell"] = d["asset"].str.upper() + " " + d["horizon"].astype(str) + "d"
+        d["p"] = (
+            d["dm_p_headline_better"].round(3).astype(str)
+            + " / "
+            + d["dm_p_holm"].round(3).astype(str)
+        )
+        wide = d.pivot(index="cell", columns="benchmark", values="p")
+        wide.index.name = "raw p / Holm p"
+        blocks.append(
+            "**Holm correction across the 30 headline comparisons (5 benchmarks x 6 cells)**"
+            + nl
+            + nl
+            + md(wide)
+            + nl
+        )
+    f = T / "robustness_calibration.csv"
+    if f.exists():
+        d = pd.read_csv(f)
+        d["cell"] = d["asset"].str.upper() + " " + d["horizon"].astype(str) + "d"
+        star = d["wald_p"].lt(0.05).map({True: "*", False: ""})
+        d["v"] = (
+            d["slope"].round(2).astype(str)
+            + " / "
+            + d["mean_log_ratio"].round(2).astype(str)
+            + star
+        )
+        wide = d.pivot(index="cell", columns="model", values="v")
+        wide.index.name = "slope / mean log(y/f); * = rejects slope 1, intercept 0"
+        blocks.append(
+            "**Calibration (log-log Mincer-Zarnowitz, Newey-West)**" + nl + nl + md(wide) + nl
+        )
+    return nl.join(blocks)
 
 
 def main():
@@ -223,6 +286,7 @@ def main():
     parts.append(timing_summary())
     parts.append(residual_monthly_summary())
     parts.append(kaggle_monthly_summary())
+    parts.append(robustness_summary())
     (T / "SUMMARY.md").write_text("\n".join(parts), encoding="utf-8")
     print("wrote", T / "SUMMARY.md")
 

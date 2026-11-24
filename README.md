@@ -66,6 +66,7 @@ Log-linear forecasts use a variance correction (training residual variance only)
 
 - **WTI** shows the same direction at 5 days (22.8% over naive, p < 0.001, better than HAR, leverage HAR and GARCH with p <= 0.001) and a weaker 22-day result (42.3% over naive, p = 0.032, but HAR p = 0.073). At 66 days no model is separable. The Brent result does not replicate cleanly at longer horizons.
 - **The OVX-only regression is weaker under strict timing:** 11.9% over naive at 5 days (p = 0.089) and 28.8% at 22 days (p = 0.002, not significantly better than GJR-t).
+- **Robustness of the headline** (sub-periods, Holm correction, calibration; `results/tables/robustness_*.csv`). The 5-day result holds in 2012-2019, in 2020-2025 and without 2020 for both assets, and all 10 comparisons survive Holm correction across the 30 headline comparisons (5 benchmarks, 2 assets, 3 horizons). The 22-day Brent result is weaker after 2020: it still beats naive (p = 0.001) but not the other benchmarks (p = 0.065 to 0.19), while without 2020 every p is below 0.001. After Holm correction only the comparisons with naive (adjusted p = 0.0007) and GARCH-t (0.035) survive; WTI at 22 days survives none (smallest adjusted p = 0.26). At 66 days only the comparison with naive separates (Brent adjusted p = 0.02). The forecasts sit above realised volatility on average (the headline by 5% to 19%, as the QLIKE variance correction implies), calibration slopes are 0.67 to 0.90, and a joint test of slope 1 and intercept 0 rejects in every cell. They rank volatility well but are not calibrated in level.
 - **The loss matters.** QLIKE favours upward-biased forecasts, and OVX typically sits above realised volatility. At 5 days GARCH has a positive QLIKE gain and a negative MSE(log volatility) gain, and the ranking of corrected and uncorrected HAR flips between the two. Both are reported in the tables.
 - Unadjusted OVX already beats naive at 22 and 66 days. The edge is the information in OVX, which earlier literature points to, so the contribution is not "OVX helps". See [the literature note](literature/notes/ovx_volatility_check_2026-11-23.md).
 - **Risk (Brent):** at 1 day, GARCH and GJR with filtered simulation pass Kupiec and Christoffersen at 1% and 5%. The t versions also pass at 1% and miss the 5% coverage (hit rates about 6.0%). On the joint FZ0 loss, GJR with simulation is not significantly different from GJR with t errors (p = 0.69 at 1%, 0.64 at 5%). At 10 days GJR with simulation passes at 5% and fails at 1%, while plain historical simulation passes 10-day 1% coverage but has by far the worst FZ0.
@@ -75,9 +76,9 @@ Full tables: [results/tables/SUMMARY.md](results/tables/SUMMARY.md). Decisions a
 
 ## Limitations
 
-- **Multiple testing is not corrected.** Each horizon and asset compares about nine models, and there are three horizons and two assets. Treat p-values near 0.05 as suggestive.
+- **Multiple testing is corrected only for the 30 headline comparisons** (Holm). The wider model ladder, the new-data and residual tables are not corrected, so treat p-values near 0.05 there as suggestive.
 - **Few independent windows at long horizons.** At 66 days the 3,350 origins contain about 50 non-overlapping windows, and the Diebold-Mariano variance uses 66 unweighted autocovariances, which is noisy.
-- **One development window of 13.5 years,** a few regimes, and no sub-period or ex-2020 results yet. The first 2012 refit has about 1,150 OVX rows.
+- **One development window of 13.5 years,** a few regimes. Sub-period and ex-2020 results exist for the headline model only. The first 2012 refit has about 1,150 OVX rows.
 - **The headline specification was refined after seeing results** (variance correction, leverage terms, strict OVX timing). All versions are in the tables, but the choice is a forking path.
 - **The holdout from 2025-07 was seen in aggregate** by an early run, so only the planned live forward test is a pristine test.
 - **Association, not causation.** OVX is a forward-looking market measure, so its link to later volatility is mechanical. No economic value (for example volatility targeting or hedging cost) has been measured.
@@ -89,14 +90,14 @@ Full tables: [results/tables/SUMMARY.md](results/tables/SUMMARY.md). Decisions a
 ```
 src/oilfc/data/        downloaders and release-date alignment
 src/oilfc/features/    daily channels, exogenous features
-src/oilfc/eval/        targets, losses, tests, rolling splits, risk, holdout helpers
+src/oilfc/eval/        targets, losses, tests, rolling splits, risk, holdout, calibration, Holm
 src/oilfc/models/      HAR, OVX and GARCH baselines, residual models
 experiments/           scripts that write results/tables/*.csv
 notebooks/, kaggle/    Kaggle GPU notebook and bundle builder
 results/tables/        generated tables (SUMMARY.md is the readable one)
 configs/               series and release lags, protocol draft
 docs/, literature/     decisions, task cards, free-resource register, literature matrix
-tests/                 unit tests (94 pass, 26 are expected failures for unfinished task cards)
+tests/                 unit tests (108 pass, 26 are expected failures for unfinished task cards)
 prior_work/            reference notes on the earlier thesis
 ```
 
@@ -116,6 +117,7 @@ python experiments/vol_risk_brent.py risk-only
 python experiments/vol_residual_brent.py     # ridge, LightGBM, MLP residuals
 python experiments/vol_exog.py               # new data groups
 python experiments/vol_ovx_timing.py         # OVX(t) versus OVX(t-1)
+python experiments/vol_robustness.py         # sub-periods, Holm correction, calibration (about 10 minutes)
 python experiments/residual_vs_monthly.py kaggle_residual_monthly   # needs results/kaggle_residual_monthly/ (committed)
 python experiments/summarise_vol.py          # writes results/tables/SUMMARY.md
 ```
