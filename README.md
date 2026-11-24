@@ -127,7 +127,7 @@ python experiments/summarise_vol.py          # writes results/tables/SUMMARY.md
 
 The transformer experiment runs on a free Kaggle GPU: see [docs/kaggle_transformer_residual.md](docs/kaggle_transformer_residual.md). Its outputs are committed: `results/kaggle_residual_monthly/` (monthly anchor, the reported run) and `results/kaggle_residual/` (the first run with a yearly anchor). Seeds: ridge is deterministic, LightGBM and the MLP use `random_state=0`, the transformer averages seeds 0 to 4. Lint with `python -m ruff check . && python -m ruff format --check .`.
 
-Verified in this environment (Windows): the test suite, lint, the offline data build and every experiment script. Not verified: a fresh virtual environment install from the requirements files (they pin some heavy packages this work does not need), a Linux or macOS run, and the GitHub Actions workflow, which has not run yet.
+Verified on Windows: the test suite, lint, the offline data build and every experiment script. Verified on GitHub Actions (Ubuntu, Python 3.12, 2026-11-24, run 45411467186): a fresh install of `requirements.txt` and `requirements-dev.txt`, lint, the format check and the test suite (the torch tests are skipped there because CI installs no deep-learning packages). Not verified: a macOS run, a fresh install of `requirements-dl.txt`, and the data build and experiment scripts on Linux (CI does not run them, they need the network).
 
 ## Project stages
 
