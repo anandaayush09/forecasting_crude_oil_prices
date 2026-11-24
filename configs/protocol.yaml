@@ -56,6 +56,7 @@ inference:
   mcs: {size: 0.10, block_size: 22, reps: 1000}
   calibration: mincer_zarnowitz_log   # Newey-West standard errors
   sub_periods: [full, ex_2020, 2012_2019, 2020_2025]
+  window_sensitivity: [1000, 504, 252]   # rolling-window refits of the ladder, reported next to the expanding window
 live_test:
   models: [naive, har_bc, lhar_bc, lhar_ovx_bc_lag1, garch_t, gjr_t]
   horizons: [5, 22, 66]

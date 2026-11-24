@@ -410,3 +410,34 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 66d | +usd_chg | -1.131 | 0.527 | 1.0 | 2.728 | 0.308 |
 | WTI 66d | +usd_vol | 16.196 | 0.338 | 1.0 | -4.396 | 0.506 |
 | WTI 66d | +both | 15.752 | 0.324 | 1.0 | -1.296 | 0.827 |
+
+**Headline against HAR by estimation window (gain > 0: headline better; p: Diebold-Mariano)**
+
+| cell | expanding gain % | expanding p | rolling_1000 gain % | rolling_1000 p | rolling_504 gain % | rolling_504 p | rolling_252 gain % | rolling_252 p |
+|---|---|---|---|---|---|---|---|---|
+| BRENT 5d | 14.1 | 0.002 | 16.8 | 0.008 | 14.0 | 0.053 | 1.7 | 0.835 |
+| BRENT 22d | 22.4 | 0.066 | 41.2 | 0.139 | 43.8 | 0.295 | 15.9 | 0.53 |
+| BRENT 66d | -1.1 | 0.84 | 11.5 | 0.251 | -58.9 | 0.373 | -828.8 | 0.318 |
+| WTI 5d | 16.8 | 0.001 | 23.8 | 0.004 | 24.9 | 0.012 | 20.7 | 0.092 |
+| WTI 22d | 27.0 | 0.073 | 43.4 | 0.138 | 51.5 | 0.247 | 40.9 | 0.286 |
+| WTI 66d | 4.1 | 0.115 | 21.8 | 0.295 | -75.0 | 0.337 | -51.9 | 0.303 |
+
+**HAR + OVX(t-1) against HAR by estimation window, and whether the 90% MCS of the four HAR variants drops HAR**
+
+| cell | expanding gain % | expanding p | expanding HAR out of MCS | rolling_1000 gain % | rolling_1000 p | rolling_1000 HAR out of MCS | rolling_504 gain % | rolling_504 p | rolling_504 HAR out of MCS | rolling_252 gain % | rolling_252 p | rolling_252 HAR out of MCS |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| BRENT 5d | 12.0 | 0.0 | True | 14.5 | 0.02 | True | 13.5 | 0.032 | True | 6.3 | 0.083 | False |
+| BRENT 22d | 18.8 | 0.029 | True | 34.2 | 0.136 | True | 33.0 | 0.154 | False | -19.8 | 0.498 | False |
+| BRENT 66d | -4.3 | 0.626 | False | 12.0 | 0.308 | False | 14.7 | 0.309 | False | -1.6 | 0.736 | False |
+| WTI 5d | 13.2 | 0.001 | True | 19.4 | 0.005 | True | 20.3 | 0.014 | True | 25.1 | 0.029 | True |
+| WTI 22d | 21.6 | 0.062 | True | 35.1 | 0.14 | False | 40.3 | 0.211 | False | 35.5 | 0.256 | False |
+| WTI 66d | 1.9 | 0.625 | False | 17.2 | 0.342 | False | 11.6 | 0.405 | False | -43.1 | 0.228 | False |
+
+**Headline against its five comparators: tests significant by window**
+
+| window | p < 0.05 (of 30) | Holm p < 0.05 (of 30) |
+|---|---|---|
+| expanding | 19 | 13 |
+| rolling_1000 | 10 | 2 |
+| rolling_504 | 5 | 1 |
+| rolling_252 | 4 | 1 |
