@@ -38,7 +38,8 @@ HAR = ["log_rv_5", "log_rv_22", "log_rv_63"]
 LEV = ["neg_ret_1", "neg_ret_5", "neg_ret_22"]
 
 
-def run(asset: str, h: int, panel: pd.DataFrame) -> pd.DataFrame:
+def forecasts(asset: str, h: int, panel: pd.DataFrame) -> pd.DataFrame:
+    """Realised volatility `y` and every model's forecast, one row per origin in the test period."""
     price = panel[f"{asset}_spot"]
     price = price.where(price > 0).dropna()
     r = development_only(np.log(price).diff().dropna(), HOLDOUT_START)
@@ -70,8 +71,12 @@ def run(asset: str, h: int, panel: pd.DataFrame) -> pd.DataFrame:
         fc[f"{kind}_t"] = garch_forecast(r, splits, h, kind)["rv_h"]
     fc["ovx_raw_lag0"] = ovx0 / 100
     fc["ovx_raw_lag1"] = ovx1 / 100
-    df = pd.concat({"y": np.exp(y), **fc}, axis=1).dropna()
-    models = list(fc)
+    return pd.concat({"y": np.exp(y), **fc}, axis=1).dropna()
+
+
+def run(asset: str, h: int, panel: pd.DataFrame) -> pd.DataFrame:
+    df = forecasts(asset, h, panel)
+    models = [c for c in df.columns if c != "y"]
     ql = pd.DataFrame({m: qlike(df["y"], df[m]) for m in models})
     ms = pd.DataFrame({m: mse_logvol(df["y"], df[m]) for m in models})
     rows = []
