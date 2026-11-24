@@ -136,7 +136,7 @@ Verified on Windows: the test suite, lint, the offline data build and every expe
 
 ## Live forward test
 
-Because the clean holdout was seen in aggregate by an early run, the only pristine test of the headline is a forward one. Since 2026-11-24, `experiments/live_run.py` writes frozen, SHA-256-stamped forecasts of volatility at 5, 22 and 66 days for Brent and WTI from six models, and `experiments/live_score.py` scores them once the windows have ended. The first forecasts have origin 2026-11-17. Nothing is scored yet, and a significance test is not meaningful before roughly 60 origins per horizon. How it works and what it can and cannot show: [live/README.md](live/README.md). A read-only API serves the frozen forecasts and scores (`python -m uvicorn oilfc.api.app:app`, spec in [docs/api_spec.md](docs/api_spec.md)).
+Because the clean holdout was seen in aggregate by an early run, the only pristine test of the headline is a forward one. Since 2026-11-24, `experiments/live_run.py` writes frozen, SHA-256-stamped forecasts of volatility at 5, 22 and 66 days for Brent and WTI from six models, and `experiments/live_score.py` scores them once the windows have ended. The first forecasts have origin 2026-11-17, and a GitHub Actions workflow now writes and commits new ones automatically. Nothing is scored yet, and a significance test is not meaningful before roughly 60 origins per horizon. How it works and what it can and cannot show: [live/README.md](live/README.md). A read-only API serves the frozen forecasts and scores (`python -m uvicorn oilfc.api.app:app`, spec in [docs/api_spec.md](docs/api_spec.md)).
 
 ## Prior work
 

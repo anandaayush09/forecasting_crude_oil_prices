@@ -1,0 +1,63 @@
+# Live forward test: writes frozen forecasts for the latest origin and commits them to main.
+#
+# Runs every day. EIA publishes spot prices about once a week, so most runs find that the forecast for
+# the latest origin already exists and change nothing. When a new origin appears, the run writes one JSON
+# file per asset, scores any finished windows, and pushes the files to main as github-actions[bot].
+# The commit time on GitHub is the outside time stamp that the forecast was fixed in advance.
+# See live/README.md. Run it by hand from the Actions tab with "Run workflow".
+name: Live forecasts
+
+on:
+  schedule:
+    - cron: "0 20 * * *"  # 20:00 UTC every day, after the weekly EIA price update
+  workflow_dispatch:
+
+# Only this job may write to the repository, and only one run at a time (never cancel a run half way).
+permissions:
+  contents: write
+
+concurrency:
+  group: live-forecasts
+  cancel-in-progress: false
+
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Refreshes the data panel (network) and writes forecasts for any new origin.
+      # An existing forecast is never overwritten.
+      - name: Write forecasts
+        run: PYTHONPATH=src python experiments/live_run.py
+
+      # Verifies the SHA-256 of every forecast file against the manifest (fails the job on a mismatch),
+      # then scores the windows that have ended. Reuses the panel built in the previous step.
+      - name: Verify and score
+        run: PYTHONPATH=src python experiments/live_score.py --no-refresh
+
+      # Commits only files under live/. Nothing is pushed when nothing changed.
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add live/forecasts live/scores.csv live/SUMMARY.md
+          if git diff --cached --quiet; then
+            echo "No new forecasts or scores."
+            exit 0
+          fi
+          git diff --cached --name-only
+          git commit -m "chore(live): forecasts and scores (automated run ${GITHUB_RUN_ID})"
+          git pull --rebase origin main
+          git push origin HEAD:main
