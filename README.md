@@ -2,7 +2,7 @@
 
 This project asks which forecasts of **crude oil volatility** and **tail risk** beat the standard benchmarks, tested out of sample and without look-ahead. It covers Brent and WTI at **5, 22 and 66 trading days**, scores forecasts with **QLIKE** and formal tests, and reports negative results as plainly as positive ones.
 
-Status: research in progress (release `v0.1.0`). The headline result so far is that a **leverage HAR regression with the OVX implied-volatility index** (OVX lagged one day) beats naive, HAR and GARCH forecasts for Brent at 5 days and for most benchmarks at 22 days. No learned model (ridge, LightGBM, neural network, transformer) beats a well-specified HAR + OVX regression yet. The research plan is in [ROADMAP.md](ROADMAP.md).
+Status: research in progress (release `v0.2.0`). The headline result so far is that a **leverage HAR regression with the OVX implied-volatility index** (OVX lagged one day) beats naive, HAR and GARCH forecasts for Brent at 5 days and for most benchmarks at 22 days. No learned model (ridge, LightGBM, neural network, transformer) beats a well-specified HAR + OVX regression yet. The research plan is in [ROADMAP.md](ROADMAP.md).
 
 ## Research problem
 
@@ -84,7 +84,7 @@ Full tables: [results/tables/SUMMARY.md](results/tables/SUMMARY.md). Decisions a
 - **The evidence depends on the expanding window.** With rolling estimation windows (1,000, 504, 252 days) the 5-day gain remains but most other comparisons lose significance after Holm correction (see Findings). The expanding window uses all history since 1987, which is also how the live test is fitted.
 - **The headline specification was refined after seeing results** (variance correction, leverage terms, strict OVX timing). All versions are in the tables, but the choice is a forking path.
 - **The holdout from 2025-07 was seen in aggregate** by an early run, so only the planned live forward test is a pristine test.
-- **Association, not causation.** OVX is a forward-looking market measure, so its link to later volatility is mechanical. No economic value (for example volatility targeting or hedging cost) has been measured.
+- **Association, not causation.** OVX is a forward-looking market measure, so its link to later volatility is mechanical. The only economic-value check is the exploratory volatility-targeting exercise above, and hedging cost has not been measured.
 - **10-day backtests have 391 non-overlapping periods,** which gives low power at the 1% level.
 - Futures data end in April 2024, and GPR and EPU are not real-time vintages.
 
@@ -103,7 +103,7 @@ notebooks/, kaggle/    Kaggle GPU notebook and bundle builder
 results/tables/        generated tables (SUMMARY.md is the readable one)
 configs/               series and release lags, protocol draft
 docs/, literature/     decisions, task cards, free-resource register, literature matrix
-tests/                 unit tests (156 pass, 22 are expected failures for unfinished task cards)
+tests/                 unit tests (161 pass, 22 are expected failures for unfinished task cards)
 prior_work/            reference notes on the earlier thesis
 ```
 
