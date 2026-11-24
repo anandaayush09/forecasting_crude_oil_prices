@@ -12,13 +12,15 @@ Python 3.12, pandas, numpy, scipy, statsmodels, arch, scikit-learn, LightGBM, Py
 - Test: `python -m pytest -q`
 - Lint: `python -m ruff check . && python -m ruff format --check .`
 - Results summary: `python experiments/summarise_vol.py`
+- Live forecasts: `python experiments/live_run.py`, commit `live/forecasts` at once, then `python experiments/live_score.py` (see `live/README.md`; forecast files are never edited or overwritten)
+- API: `python -m uvicorn oilfc.api.app:app` (read-only, spec in `docs/api_spec.md`)
 
 ## Layout
-`src/oilfc/{data,features,eval,models}` library code, `experiments/` scripts that write `results/tables/`, `tests/`, `configs/`, `docs/` (ADRs, task cards), `literature/`.
+`src/oilfc/{data,features,eval,models,live,api}` library code, `experiments/` scripts that write `results/tables/`, `tests/`, `configs/`, `docs/` (ADRs, task cards), `literature/`.
 
 ## Conventions
 - Type hints on public functions, docstrings that state units and information timing.
-- Every feature at time t uses only data public by t (see `configs/data.yaml` for release lags).
+- Every feature at time t uses only data public by t (see `configs/data.yaml` for release lags). New feature builders go into the `FEATURES` registry in `tests/test_leakage.py`.
 - The clean holdout (from 2025-07-01) is never evaluated in development: use `oilfc.eval.holdout.development_only`.
 - Generated tables in `results/` are never hand-edited. Documents quote `results/tables/SUMMARY.md`.
 - Conventional commits (`feat:`, `fix:`, `docs:`, `test:`, `chore:`). No paid API calls in tests or experiments.
