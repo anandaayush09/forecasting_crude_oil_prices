@@ -279,6 +279,20 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | wti | 22 | 3312 | ridge_window | 0.3331 | 0.3032 | -9.8752 | 0.0221 |
 | wti | 22 | 3312 | anchor_har_ovx_bc | 0.3389 | 0.3032 | -11.7882 | 0.0163 |
 
+**Residual models, monthly-anchor Kaggle rerun (QLIKE gain; > 0: residual model better)**
+
+| cell | model | gain vs own anchor % | p | Holm p (9 tests) | gain added to monthly HAR+OVX % | p (added) |
+|---|---|---|---|---|---|---|
+| BRENT 5d | ridge_window | 2.16 | 0.345 | 1.0 | 1.99 | 0.407 |
+| BRENT 5d | mlp_seq | 0.35 | 0.775 | 1.0 | 0.29 | 0.824 |
+| BRENT 5d | transformer_seq | 2.46 | 0.014 | 0.13 | 1.59 | 0.133 |
+| BRENT 22d | ridge_window | -0.86 | 0.513 | 1.0 | -1.05 | 0.528 |
+| BRENT 22d | mlp_seq | -1.23 | 0.536 | 1.0 | -2.71 | 0.362 |
+| BRENT 22d | transformer_seq | -1.22 | 0.611 | 1.0 | -1.51 | 0.546 |
+| WTI 22d | ridge_window | 2.06 | 0.68 | 1.0 | 2.34 | 0.652 |
+| WTI 22d | mlp_seq | -2.03 | 0.198 | 1.0 | -2.94 | 0.073 |
+| WTI 22d | transformer_seq | -0.39 | 0.67 | 1.0 | -0.61 | 0.507 |
+
 **Headline (leverage HAR + OVX(t-1)) by sample: gain over naive and Diebold-Mariano p that it beats each benchmark**
 
 | asset | horizon | period | n | gain vs naive % | p vs garch_t | p vs gjr_t | p vs har_bc | p vs lhar_bc | p vs naive |

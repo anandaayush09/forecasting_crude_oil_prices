@@ -3,11 +3,16 @@
 .venv/Scripts/python.exe experiments/summarise_vol.py
 """
 
+import sys
 from pathlib import Path
 
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from oilfc.eval.multiplicity import holm_adjust  # noqa: E402
+
 T = ROOT / "results" / "tables"
 KEY = [
     "naive",
@@ -147,6 +152,50 @@ def residual_monthly_summary() -> str:
     return title + nl + nl + md(d) + nl
 
 
+def kaggle_monthly_summary() -> str:
+    """Residual models from the monthly-anchor Kaggle rerun: gain vs their own anchor (Holm over all
+    nine tests) and the same correction added to the monthly HAR + OVX benchmark."""
+    base = ROOT / "results" / "kaggle_residual_monthly"
+    nl = chr(10)
+    cells = (("brent", 5), ("brent", 22), ("wti", 22))
+    models = ("ridge_window", "mlp_seq", "transformer_seq")
+    rows = []
+    for asset, h in cells:
+        f = base / f"vol_residual_seq_{asset}_{h}d.csv"
+        if not f.exists():
+            return ""
+        d = pd.read_csv(f, index_col=0)
+        for m in models:
+            rows.append(
+                {
+                    "cell": f"{asset.upper()} {h}d",
+                    "model": m,
+                    "gain vs own anchor %": round(d.loc[m, "qlike_gain_vs_anchor_pct"], 2),
+                    "p": d.loc[m, "dm_p_qlike_vs_anchor"],
+                }
+            )
+    t = pd.DataFrame(rows)
+    t["Holm p (9 tests)"] = holm_adjust(t["p"].to_numpy()).round(3)
+    t["p"] = t["p"].round(3)
+    f = T / "residual_vs_monthly_benchmarks_kaggle_residual_monthly.csv"
+    if f.exists():
+        g = pd.read_csv(f)
+        g = g[g["model"].str.endswith("_on_benchmark_anchor")].copy()
+        g["model"] = g["model"].str.replace("_on_benchmark_anchor", "")
+        g["cell"] = g["asset"].str.upper() + " " + g["horizon"].astype(str) + "d"
+        g = g.set_index(["cell", "model"])
+        keys = list(zip(t["cell"], t["model"], strict=True))
+        t["gain added to monthly HAR+OVX %"] = [
+            round(g.loc[k, "gain_vs_benchmark_pct"], 2) for k in keys
+        ]
+        t["p (added)"] = [round(g.loc[k, "dm_p"], 3) for k in keys]
+    t = t.set_index("cell")
+    title = (
+        "**Residual models, monthly-anchor Kaggle rerun (QLIKE gain; > 0: residual model better)**"
+    )
+    return title + nl + nl + md(t) + nl
+
+
 def robustness_summary() -> str:
     """Sub-periods, Holm-corrected p-values and calibration of the strict-timing headline."""
     nl = chr(10)
@@ -236,6 +285,7 @@ def main():
     parts.append(exog_summary())
     parts.append(timing_summary())
     parts.append(residual_monthly_summary())
+    parts.append(kaggle_monthly_summary())
     parts.append(robustness_summary())
     (T / "SUMMARY.md").write_text("\n".join(parts), encoding="utf-8")
     print("wrote", T / "SUMMARY.md")

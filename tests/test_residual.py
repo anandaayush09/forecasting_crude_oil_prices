@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
 
@@ -92,3 +93,63 @@ def test_a_split_with_too_little_training_data_is_skipped_not_crashed():
     splits = expanding_splits(X.index, X.index[100], 1, 3)[:1]  # only 99 rows to train on
     out = residual_forecast(X, y, splits, ["x"], ["x", "z"], lambda: Ridge(alpha=1.0))
     assert out["pred"].isna().all()
+
+
+def _monthly_splits(X, n=6):
+    return expanding_splits(X.index, X.index[1200], 1, 1)[:n]
+
+
+def test_refit_every_one_is_the_default():
+    X, y = _data(signal=True)
+    splits = _monthly_splits(X, 3)
+    default = residual_forecast(X, y, splits, ["x"], ["x", "z"], lambda: Ridge(alpha=1.0))
+    explicit = residual_forecast(
+        X, y, splits, ["x"], ["x", "z"], lambda: Ridge(alpha=1.0), residual_refit_every=1
+    )
+    pd.testing.assert_frame_equal(default, explicit)
+
+
+def test_the_residual_model_refits_every_k_splits_but_the_anchor_refits_every_split():
+    X, y = _data(signal=True)
+    splits = _monthly_splits(X, 6)
+    calls = []
+
+    def counting():
+        calls.append(1)
+        return Ridge(alpha=1.0)
+
+    slow = residual_forecast(X, y, splits, ["x"], ["x", "z"], counting, residual_refit_every=3)
+    assert len(calls) == 4  # two refits, each fits a validation model and a final model
+    fast = residual_forecast(X, y, splits, ["x"], ["x", "z"], lambda: Ridge(alpha=1.0))
+    assert np.allclose(slow["anchor"], fast["anchor"], equal_nan=True)  # anchor: same monthly OLS
+    pos = [t for _, t in splits]
+    alpha = [slow["alpha"].iloc[t[0]] for t in pos]
+    assert alpha[0] == alpha[1] == alpha[2]
+    assert alpha[3] == alpha[4] == alpha[5]
+    # inside a group the correction comes from the older model, so it differs from a monthly refit
+    assert not np.allclose(slow["residual"].iloc[pos[2]], fast["residual"].iloc[pos[2]])
+
+
+def test_a_cached_residual_model_never_sees_rows_newer_than_its_refit():
+    X, y = _data(signal=True)
+    splits = _monthly_splits(X, 3)
+    base = residual_forecast(
+        X, y, splits, ["x"], ["x", "z"], lambda: Ridge(alpha=1.0), residual_refit_every=3
+    )
+    y2 = y.copy()
+    newer = splits[1][0]  # training rows that split 1 has and split 0 does not
+    y2.iloc[splits[0][0][-1] + 1 : newer[-1] + 1] = 99.0
+    again = residual_forecast(
+        X, y2, splits, ["x"], ["x", "z"], lambda: Ridge(alpha=1.0), residual_refit_every=3
+    )
+    block = splits[1][1]
+    assert np.allclose(again["residual"].iloc[block], base["residual"].iloc[block])
+    assert np.allclose(again["alpha"].iloc[block], base["alpha"].iloc[block])
+
+
+def test_refit_every_below_one_is_rejected():
+    X, y = _data(signal=True)
+    with pytest.raises(ValueError):
+        residual_forecast(
+            X, y, _splits(X), ["x"], ["x", "z"], lambda: Ridge(), residual_refit_every=0
+        )
