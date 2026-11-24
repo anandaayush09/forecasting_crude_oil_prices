@@ -98,7 +98,7 @@ notebooks/, kaggle/    Kaggle GPU notebook and bundle builder
 results/tables/        generated tables (SUMMARY.md is the readable one)
 configs/               series and release lags, protocol draft
 docs/, literature/     decisions, task cards, free-resource register, literature matrix
-tests/                 unit tests (114 pass, 26 are expected failures for unfinished task cards)
+tests/                 unit tests (127 pass, 22 are expected failures for unfinished task cards)
 prior_work/            reference notes on the earlier thesis
 ```
 
