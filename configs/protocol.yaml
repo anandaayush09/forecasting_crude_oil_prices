@@ -1,28 +1,66 @@
-# DRAFT: freeze and tag `protocol-frozen` in week 6. You decide the freeze; see ROADMAP section 8.
-# Revised 2026-11-23: volatility and risk are the headline targets (ADR 0002); price forecasts are secondary.
+# PROTOCOL v1 (DRAFT FOR FREEZE). Tag `protocol-frozen` only after Aayush approves this file and ADR 0003.
+#
+# What freezing does and does not mean here.
+# - Development period (test origins 2012-01 to 2025-06): the models, losses and tests below were chosen
+#   WHILE the development results were visible. This file records what was run. It is a disclosure,
+#   not a pre-registration of those results.
+# - Clean holdout (from 2025-07-01) and the live forward test: these are the pre-registered parts.
+#   Nothing after the freeze tag may change the rules below for them.
+# - The holdout was seen once in aggregate by early baseline runs (BUGS B-002, DECISIONS D-004), so the
+#   live forward test is the only pristine evidence.
+# Any change after the tag needs a new version (protocol v2), a dated note in ADR 0003 and a reason.
+
+version: 1
+revised: 2026-11-24
+
 targets: {primary: brent, robustness: wti}
-daily:   {horizons: [1, 5, 10, 22, 66], unit: trading_days}
-monthly: {horizons: [1, 3, 6, 12, 24], unit: months}
+daily:   {horizons: [1, 5, 10, 22, 66], unit: trading_days}      # secondary (price and risk tasks)
+monthly: {horizons: [1, 3, 6, 12, 24], unit: months}             # secondary (price tasks, not evaluated so far)
+
 volatility:                       # headline task
   target: forward_realized_vol    # sqrt(252 * mean squared daily log return over t+1..t+h), annualised
   horizons: [5, 22, 66]
   unit: trading_days
-  anchor: har_ovx                 # deep and AR-MoE models predict a shrunk residual on this
-  benchmarks: [naive_rv, ewma, garch_t, gjr_garch_t, har, ovx, har_ovx]
-  losses: [qlike, mse_logvol, mse_var]    # qlike is primary
+  headline_model: lhar_ovx_bc_lag1   # leverage HAR with OVX of the previous trading day, QLIKE variance-corrected
+  ovx_timing: previous_trading_day   # strict: the OVX at origin t is the value of day t-1 (see D-011, B-007)
+  # Benchmark ladder (names as in experiments/vol_ovx_timing.py and src/oilfc/live/forecast.py)
+  benchmarks: [naive, har_bc, lhar_bc, ovx_bc_lag0, har_ovx_bc_lag0, lhar_ovx_bc_lag0,
+                ovx_bc_lag1, har_ovx_bc_lag1, lhar_ovx_bc_lag1, garch_t, gjr_t, ewma]   # ewma: only in vol_risk_brent.py
+  claim_comparators: [naive, har_bc, lhar_bc, garch_t, gjr_t]   # the headline must beat these ("standard benchmarks")
+  anchor: har_ovx_bc_lag0         # deep and ML residual models predict a shrunk correction on this anchor
+  anchor_ovx_timing: same_day     # KNOWN LIMITATION: the residual pipeline uses same-day OVX, the headline uses the lag
+  losses: [qlike, mse_logvol]     # qlike is primary and decides every ranking
+  variance_correction: qlike_exp_s2        # exp(log forecast + s2), s2 = variance of the training residuals (D-002)
 risk:
   var_levels: [0.01, 0.05]
   horizons: [1, 10]
-  backtests: [kupiec, christoffersen, es_test, fz0]
+  backtests: [kupiec, christoffersen, es_exceedance, fz0]
+  density_scores: [crps_normal, pinball]
+  headline_method: filtered_historical_simulation   # for 10-day VaR/ES (D-003)
 design:
   scheme: expanding_window_rolling_origin
   train_start: 1987-05-20
-  test_start: 2010-01-01          # price-only models
-  ovx_test_start: 2012-01-01      # anything using OVX (starts 2007-05)
-  text_modes_test_start: 2015-01-01
+  test_start: 2010-01-01          # price-only models and risk backtests
+  ovx_test_start: 2012-01-01      # anything using OVX (OVX starts 2007-05)
+  test_end: 2025-06-30            # last development test origin
   gap: horizon                    # training origins end h + 1 rows before the first test origin: every training target is realised before it
-  refit: {deep: yearly, statistical: monthly}
-  seeds: 5
-clean_holdout_start: 2025-07-01   # TSFM contamination control; for volatility also keep the last 12 months untouched
-metrics: [mspe_ratio, mae_ratio, mase, success_ratio, crps, pinball, coverage, winkler, qlike, mse_logvol]
-tests: [dm_hln, clark_west, giacomini_white, mcs, multi_horizon_spa, giacomini_rossi, pesaran_timmermann]
+  refit: {anchor: monthly, statistical: monthly, deep_residual: yearly}
+  seeds: 5                        # deep models: mean over seeds
+  seq_len: 64                     # days of six channels seen by the deep models
+clean_holdout_start: 2025-07-01   # never evaluated in development; one final run after the freeze (oilfc.eval.holdout)
+holdout_rule: single_evaluation   # one run, one report, whatever the result
+inference:
+  primary_test: dm_hln            # Diebold-Mariano, rectangular kernel with Harvey-Leybourne-Newbold correction, lag h-1
+  sensitivity_test: dm_bartlett   # Bartlett kernel without the HLN factor; reported, never the headline test
+  multiplicity: holm              # one family: headline vs the 5 comparators x 2 assets x 3 horizons = 30 tests
+  mcs: {size: 0.10, block_size: 22, reps: 1000}
+  calibration: mincer_zarnowitz_log   # Newey-West standard errors
+  sub_periods: [full, ex_2020, 2012_2019, 2020_2025]
+live_test:
+  models: [naive, har_bc, lhar_bc, lhar_ovx_bc_lag1, garch_t, gjr_t]
+  horizons: [5, 22, 66]
+  origins: latest_only            # frozen JSON, SHA-256, never overwritten (D-015)
+  success: >
+    The headline has a lower mean QLIKE than naive, har_bc, lhar_bc, garch_t and gjr_t at 5 and 22 days
+    on both assets, with Diebold-Mariano p below 0.05 once at least 60 origins per horizon are scored.
+    A result against this is reported as it comes. No other horizon or model may be added to the claim.
