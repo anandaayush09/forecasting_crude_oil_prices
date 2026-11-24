@@ -38,4 +38,6 @@ Files: `results/kaggle_residual/` (Brent 22 and 5 days, WTI 22 days, plus the sm
 
 ## Rerun with a monthly anchor (2026-11-24)
 
-The first run refit the anchor yearly, so its one significant cell (Brent, 5 days) compared a yearly anchor with a model that also moved the anchor. The script now refits the anchor monthly (`--refit-months 1`) and the residual models every 12 splits (`--residual-every 12`, the notebook sets both). Rebuild the bundle (`kaggle/build_upload.py`), upload it again as a new version of `oilfc-residual`, rerun cells 3 to 5 and unzip the outputs into `results/kaggle_residual_monthly/`. Then run `experiments/residual_vs_monthly.py` on that folder.
+The first run refit the anchor yearly, so its one significant cell (Brent, 5 days) compared a yearly anchor with a model that also moved the anchor. The script now refits the anchor monthly (`--refit-months 1`) and the residual models every 12 splits (`--residual-every 12`, the notebook sets both). Rebuild the bundle (`kaggle/build_upload.py`), upload it again as a new version of `oilfc-residual`, rerun cells 3 to 5 and unzip the outputs into `results/kaggle_residual_monthly/`. Then run `experiments/residual_vs_monthly.py kaggle_residual_monthly`.
+
+**Result of the rerun (2026-11-24):** see `ROADMAP.md` (baseline results, transformer residuals). The 5-day transformer gain against its own anchor stays nominally significant (p = 0.014) but not after correction for nine comparisons, and nothing beats the monthly leverage HAR + OVX.

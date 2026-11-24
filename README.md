@@ -69,7 +69,7 @@ Log-linear forecasts use a variance correction (training residual variance only)
 - **The loss matters.** QLIKE favours upward-biased forecasts, and OVX typically sits above realised volatility. At 5 days GARCH has a positive QLIKE gain and a negative MSE(log volatility) gain, and the ranking of corrected and uncorrected HAR flips between the two. Both are reported in the tables.
 - Unadjusted OVX already beats naive at 22 and 66 days. The edge is the information in OVX, which earlier literature points to, so the contribution is not "OVX helps". See [the literature note](literature/notes/ovx_volatility_check_2026-11-23.md).
 - **Risk (Brent):** at 1 day, GARCH and GJR with filtered simulation pass Kupiec and Christoffersen at 1% and 5%. The t versions also pass at 1% and miss the 5% coverage (hit rates about 6.0%). On the joint FZ0 loss, GJR with simulation is not significantly different from GJR with t errors (p = 0.69 at 1%, 0.64 at 5%). At 10 days GJR with simulation passes at 5% and fails at 1%, while plain historical simulation passes 10-day 1% coverage but has by far the worst FZ0.
-- **Negative results:** learned residual models do not beat HAR + OVX. The one significant transformer cell (Brent, 5 days) disappears against benchmarks refit monthly. Adding futures slope, crude stocks, GPR, EPU or VIX improves QLIKE in none of 12 cells, and makes it significantly worse in some (for example VIX for Brent at 22 days). Small MSE gains appear for WTI at 5 days (policy uncertainty and all groups together).
+- **Negative results:** learned residual models do not beat HAR + OVX. The one nominal transformer gain (Brent, 5 days, +2.5% against its own anchor, p = 0.014) does not survive a correction for nine comparisons (Holm-adjusted p = 0.13), and added to the monthly HAR + OVX benchmark it is +1.6% (p = 0.13). Adding futures slope, crude stocks, GPR, EPU or VIX improves QLIKE in none of 12 cells, and makes it significantly worse in some (for example VIX for Brent at 22 days). Small MSE gains appear for WTI at 5 days (policy uncertainty and all groups together).
 
 Full tables: [results/tables/SUMMARY.md](results/tables/SUMMARY.md). Decisions and caveats: [ROADMAP.md](ROADMAP.md), [docs/adr/](docs/adr/).
 
@@ -116,11 +116,11 @@ python experiments/vol_risk_brent.py risk-only
 python experiments/vol_residual_brent.py     # ridge, LightGBM, MLP residuals
 python experiments/vol_exog.py               # new data groups
 python experiments/vol_ovx_timing.py         # OVX(t) versus OVX(t-1)
-python experiments/residual_vs_monthly.py    # needs results/kaggle_residual/ (committed)
+python experiments/residual_vs_monthly.py kaggle_residual_monthly   # needs results/kaggle_residual_monthly/ (committed)
 python experiments/summarise_vol.py          # writes results/tables/SUMMARY.md
 ```
 
-The transformer experiment runs on a free Kaggle GPU: see [docs/kaggle_transformer_residual.md](docs/kaggle_transformer_residual.md). Its outputs in `results/kaggle_residual/` are committed. Seeds: ridge is deterministic, LightGBM and the MLP use `random_state=0`, the transformer averages seeds 0 to 4. Lint with `python -m ruff check . && python -m ruff format --check .`.
+The transformer experiment runs on a free Kaggle GPU: see [docs/kaggle_transformer_residual.md](docs/kaggle_transformer_residual.md). Its outputs are committed: `results/kaggle_residual_monthly/` (monthly anchor, the reported run) and `results/kaggle_residual/` (the first run with a yearly anchor). Seeds: ridge is deterministic, LightGBM and the MLP use `random_state=0`, the transformer averages seeds 0 to 4. Lint with `python -m ruff check . && python -m ruff format --check .`.
 
 Verified in this environment (Windows): the test suite, lint, the offline data build and every experiment script. Not verified: a fresh virtual environment install from the requirements files (they pin some heavy packages this work does not need), a Linux or macOS run, and the GitHub Actions workflow, which has not run yet.
 

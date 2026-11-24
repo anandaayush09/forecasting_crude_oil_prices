@@ -4,7 +4,8 @@
 
 The deep-model pipeline refits yearly (the anchor too), the benchmark ladder monthly. This script scores
 the saved Kaggle predictions (results/kaggle_residual/vol_residual_seq_predictions_*.csv) and the monthly
-HAR + OVX and leverage HAR + OVX forecasts on exactly the same origins. results_folder
+HAR + OVX and leverage HAR + OVX forecasts on exactly the same origins. For the HAR + OVX benchmark it
+also scores each residual model's saved correction added to the benchmark itself (`*_on_benchmark_anchor`). results_folder
 defaults to kaggle_residual (yearly anchor); pass kaggle_residual_monthly for the monthly-anchor rerun.
 Writes results/tables/residual_vs_monthly_benchmarks.csv (or ..._<folder>.csv for another folder).
 """
@@ -70,6 +71,21 @@ def main(folder="kaggle_residual"):
                     "gain_vs_benchmark_pct": 100 * (1 - qm.mean() / qb.mean()),
                     "dm_p": dm_hln(qb, qm, h)[1],
                 })  # fmt: skip
+            if name == "har_ovx_bc_monthly":
+                # the saved correction (log forecast minus log anchor) added to the monthly benchmark
+                # itself, so the anchor's calibration is the benchmark's own (not the pipeline's)
+                for m in ("transformer_seq", "mlp_seq", "ridge_window"):
+                    moved = np.exp(
+                        np.log(d["bench"]) + np.log(d[m]) - np.log(d["anchor_har_ovx_bc"])
+                    )
+                    qm = qlike(d["y"], moved)
+                    rows.append({
+                        "asset": asset, "horizon": h, "n": len(d), "benchmark": name,
+                        "model": f"{m}_on_benchmark_anchor", "qlike_model": qm.mean(),
+                        "qlike_benchmark": qb.mean(),
+                        "gain_vs_benchmark_pct": 100 * (1 - qm.mean() / qb.mean()),
+                        "dm_p": dm_hln(qb, qm, h)[1],
+                    })  # fmt: skip
     out = pd.DataFrame(rows)
     suffix = "" if folder == "kaggle_residual" else f"_{folder}"
     out.to_csv(
