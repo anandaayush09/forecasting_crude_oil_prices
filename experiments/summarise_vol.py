@@ -344,22 +344,24 @@ def main():
     ]
     for asset in ("brent", "wti"):
         parts.append(ladder(asset))
-    f = T / "risk_backtests_brent.csv"
-    if f.exists():
-        d = pd.read_csv(f).round(4).set_index(["horizon_days", "tau", "model"])
-        parts.append(
-            "**VaR / ES backtests (Brent)**\n\n"
-            + md(d.reset_index().set_index("horizon_days"))
-            + "\n"
-        )
-    f = T / "risk_fz0_dm_brent.csv"
-    if f.exists():
-        d = pd.read_csv(f).round(4)
-        parts.append(
-            "**FZ0, GJR-FHS vs each model (diff > 0: GJR-FHS better)**\n\n"
-            + md(d.set_index("horizon_days"))
-            + "\n"
-        )
+    for asset in ("brent", "wti"):
+        label = "Brent" if asset == "brent" else "WTI"
+        f = T / f"risk_backtests_{asset}.csv"
+        if f.exists():
+            d = pd.read_csv(f).round(4).set_index(["horizon_days", "tau", "model"])
+            parts.append(
+                f"**VaR / ES backtests ({label})**\n\n"
+                + md(d.reset_index().set_index("horizon_days"))
+                + "\n"
+            )
+        f = T / f"risk_fz0_dm_{asset}.csv"
+        if f.exists():
+            d = pd.read_csv(f).round(4)
+            parts.append(
+                f"**FZ0 ({label}), GJR-FHS vs each model (diff > 0: GJR-FHS better)**\n\n"
+                + md(d.set_index("horizon_days"))
+                + "\n"
+            )
     f = T / "vol_residual_brent_22d.csv"
     if f.exists():
         d = pd.read_csv(f, index_col=0).drop(columns=["n"]).round(4)
