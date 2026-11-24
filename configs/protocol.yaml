@@ -1,4 +1,5 @@
-# PROTOCOL v1 (DRAFT FOR FREEZE). Tag `protocol-frozen` only after Aayush approves this file and ADR 0003.
+# PROTOCOL v1, FROZEN 2026-11-25 (git tag `protocol-frozen`). Approved by Aayush together with ADR 0003.
+# Any change after the tag needs protocol v2 and a dated note in ADR 0003.
 #
 # What freezing does and does not mean here.
 # - Development period (test origins 2012-01 to 2025-06): the models, losses and tests below were chosen
@@ -11,7 +12,7 @@
 # Any change after the tag needs a new version (protocol v2), a dated note in ADR 0003 and a reason.
 
 version: 1
-revised: 2026-11-24
+revised: 2026-11-25
 
 targets: {primary: brent, robustness: wti}
 daily:   {horizons: [1, 5, 10, 22, 66], unit: trading_days}      # secondary (price and risk tasks)
