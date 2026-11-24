@@ -1,7 +1,7 @@
 # 0003. Protocol v1: what is frozen, and what freezing means here
 
-- Status: **proposed by the assistant; edit it, then approve or reject. The `protocol-frozen` tag is made only after you approve.**
-- Date: 2026-11-24
+- Status: **accepted by Aayush on 2026-11-25, drafted by the assistant. The `protocol-frozen` tag marks the commit that carries this status.**
+- Date: 2026-11-24 (accepted 2026-11-25)
 
 ## Context
 
