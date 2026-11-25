@@ -21,4 +21,4 @@ indices:
   gpr_daily: {source: gpr, lag: {kind: days, n: 7}}  # Caldara-Iacoviello daily GPR; file updated about weekly
   epu_daily: {source: epu, lag: {kind: days, n: 2}}  # Baker-Bloom-Davis US daily EPU; updated about daily
 target: brent_spot
-# TODO(Phase 1b): real-time vintages via ALFRED (needs a free FRED API key) for CPI and other revised series.
+# TODO: real-time vintages via ALFRED (needs a free FRED API key) for CPI and other revised series.

@@ -105,7 +105,7 @@ Plus `GET /health`, which checks the DB, Redis and vector store, not just the pr
 Learning artifacts that you write and I review:
 - `docs/architecture.md`, kept current by you.
 - `docs/adr/NNNN-*.md`: one per decision (context, options, decision, consequences). This rehearses the "why X over Y" interview probe.
-- `docs/progress_log.md`: weekly, three lines (built, broke, learned).
+- A weekly personal log, three lines (built, broke, learned), kept outside the repository.
 - Task cards in `docs/tasks/` (goal, concepts, acceptance tests, hints, stretch). Each ships with a test marked `xfail` until you implement it, so CI stays green.
 - Explain-back gate: each milestone ends with a short quiz from me; it is done only when you pass it.
 
@@ -133,7 +133,7 @@ mcp_server/      server.py (as_of-enforced tools)
 web/             Vite React TS app
 docker/          api, worker, web Dockerfiles
 compose.yaml  .env.example  .github/workflows/ci.yml  .pre-commit-config.yaml  pyproject.toml
-docs/            architecture.md, ENGINEERING_ROADMAP.md, adr/, tasks/, progress_log.md
+docs/            architecture.md, ENGINEERING_ROADMAP.md, adr/, tasks/
 ```
 
 ## 7. Proposed first step (E0 scaffolding), not yet done

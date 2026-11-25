@@ -37,4 +37,4 @@ async def fetch_many(client, urls: dict[str, str], *, concurrency=5, retries=3, 
 
 ## Stretch (after the tests pass)
 
-Change `build.py` to download the FRED series with `fetch_many` while keeping `parse_fred_csv` synchronous and pure. Keep `--offline` working. Measure the time before and after, and write the numbers in `docs/progress_log.md`.
+Change `build.py` to download the FRED series with `fetch_many` while keeping `parse_fred_csv` synchronous and pure. Keep `--offline` working. Measure the time before and after, and keep the numbers in your own log.

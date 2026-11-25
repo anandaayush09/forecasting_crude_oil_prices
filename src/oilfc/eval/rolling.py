@@ -22,6 +22,12 @@ def expanding_splits(
     rows, ending at the same last usable origin); None keeps every earlier origin (expanding window).
     refit_days: if given, test blocks are this many calendar days long (refit_months is then ignored).
     """
+    if refit_days is None and refit_months < 1:
+        raise ValueError(f"refit_months must be at least 1, got {refit_months}")
+    if refit_days is not None and refit_days < 1:
+        raise ValueError(f"refit_days must be at least 1, got {refit_days}")
+    if window is not None and window < 1:
+        raise ValueError(f"window must be at least 1, got {window}")
     splits = []
     k = 0
     while True:

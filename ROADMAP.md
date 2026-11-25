@@ -447,14 +447,14 @@ Forecasting Crude Oil Prices/
 
 ---
 
-## 12. Execution on approval (this session)
+## 12. Initial setup (done)
 
 1. Write this roadmap to `ROADMAP.md` in the project folder.
 2. Create the §11 folder skeleton, `.gitignore`, a `requirements.txt` with pinned versions, and a `Makefile` with placeholder targets.
 3. Create the `literature/lit_matrix.csv` template. Columns: citation, year, venue, target, frequency, horizons, model family, transformer?, agent/LLM?, RW benchmark?, futures benchmark?, stat tests, decomposition?, decomposition causal?, scaler/split leakage risk, LLM look-ahead control?, reported gain, notes.
 4. Add stub leakage tests in `tests/` (marked xfail until implemented) and run `git init`, so protocol and model freezes become tagged commits.
 
-Data download scripts, the evaluation harness, the MCP tool server and the agents follow as Phase 1–4 work in later turns.
+The data scripts, the evaluation library, the live test and the API followed in later stages; see the tags and branch history. The MCP tool server and the agents were not built.
 
 ## Verification
 

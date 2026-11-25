@@ -64,6 +64,24 @@ def check_frozen(
     return git("rev-parse", "HEAD").stdout.strip()
 
 
+def src_changes_since_freeze(
+    repo: Path, tag: str = "protocol-frozen", path: str = "src"
+) -> list[str]:
+    """Files under `path` that differ between the freeze tag and HEAD.
+
+    check_frozen guards the protocol file only. Model or evaluation code may legitimately change after
+    the freeze (the holdout module itself is added later), so the list is recorded with the result and
+    printed before the run, for a reader to judge, rather than blocked.
+    """
+    out = subprocess.run(
+        ["git", "-C", str(repo), "diff", "--name-only", tag, "HEAD", "--", path],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return sorted(line for line in out.stdout.splitlines() if line)
+
+
 def holdout_forecasts(
     r: pd.Series, ovx: pd.Series, h: int, start, models: tuple[str, ...] = KNOWN_MODELS
 ) -> pd.DataFrame:

@@ -14,6 +14,7 @@ Each tuple is (train_positions, test_positions): integer positions into `index`.
 
 import numpy as np
 import pandas as pd
+import pytest
 
 INDEX = pd.bdate_range("2000-01-03", "2020-12-31")
 
@@ -98,3 +99,14 @@ def test_day_blocks_give_more_refits_with_the_same_test_origins_and_gap():
     assert len(weekly) > 3 * len(monthly)
     assert (np.concatenate([t for _, t in weekly]) == np.concatenate([t for _, t in monthly])).all()
     assert all(train[-1] + 22 < test[0] for train, test in weekly)
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [{"refit_months": 0}, {"refit_months": 1, "refit_days": 0}, {"refit_months": 1, "window": 0}],
+)
+def test_nonpositive_block_or_window_sizes_are_rejected_instead_of_looping_forever(kwargs):
+    from oilfc.eval.rolling import expanding_splits
+
+    with pytest.raises(ValueError, match="at least 1"):
+        expanding_splits(INDEX, pd.Timestamp("2010-01-01"), 5, **kwargs)
