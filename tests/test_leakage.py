@@ -19,7 +19,7 @@ import pytest
 from oilfc.eval.targets import past_realized_vol
 from oilfc.features.exog import exogenous_features, fx_features
 from oilfc.features.vol import CHANNELS, daily_channels, lag_window
-from oilfc.models.baselines.vol import ewma_vol, har_design, leverage_design
+from oilfc.models.baselines.vol import ewma_vol, har_design, leverage_design, ovx_features
 
 N, T_CUT = 500, 350
 
@@ -67,6 +67,9 @@ FEATURES = {
     "lag_window": lambda p, r: lag_window(daily_channels(p, r), CHANNELS, 16),
     "exogenous_features": lambda p, r: exogenous_features(p, p.index),
     "fx_features": lambda p, r: fx_features(p, p.index),
+    "ovx_features": lambda p, r: ovx_features(
+        har_design(r, p["ovx"].shift(1))["log_ovx"], har_design(r)["log_rv_22"]
+    ),
     "daily_channels_lag1": lambda p, r: daily_channels(p, r, ovx_lag=1),
 }
 

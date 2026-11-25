@@ -32,3 +32,7 @@ All use the headline's inputs timing (OVX of the previous trading day), the same
 - The selection among five candidates is done once, by this rule, on the development period. A winner is reported as a development-data result selected by a pre-registered rule, not as a confirmed result.
 - Every candidate and cell is reported, including the failures.
 - Departures from this note are recorded as dated amendments here.
+
+## Outcome (2026-11-25)
+
+No candidate improves the headline: all 30 Holm-adjusted p-values are 1.0 and the SPA p per cell is between 0.25 and 0.94. Candidates C2 (weighted least squares), C3 (OVX dynamics) and C5 (combination) are each significantly worse in at least one cell. The headline stays. The largest raw gains are at Brent 66 days (C5 +5.2%, C3 +3.7% against the headline, one-sided p 0.26 and 0.18). Results: `results/tables/improve_candidates.csv`.

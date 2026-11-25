@@ -32,6 +32,23 @@ def har_design(returns: pd.Series, ovx: pd.Series | None = None) -> pd.DataFrame
     return design
 
 
+def ovx_features(log_ovx: pd.Series, log_rv_22: pd.Series) -> pd.DataFrame:
+    """OVX dynamics: 5-day and 22-day means of log OVX, and the positive and negative parts of the gap
+    log OVX minus log 22-day realised volatility (an implied-versus-realised, variance-risk-premium proxy).
+
+    log_ovx must already be lagged to the forecast origin (see har_design). Every value at t uses
+    information up to and including t. The gap is split by sign because the gap itself is a linear
+    combination of two HAR inputs and would add nothing to a linear model.
+    """
+    gap = log_ovx - log_rv_22
+    return pd.DataFrame({
+        "log_ovx_5": log_ovx.rolling(5).mean(),
+        "log_ovx_22": log_ovx.rolling(22).mean(),
+        "gap_pos": gap.clip(lower=0.0),
+        "gap_neg": gap.clip(upper=0.0),
+    })  # fmt: skip
+
+
 def leverage_design(returns: pd.Series, windows=(1, 5, 22)) -> pd.DataFrame:
     """Leverage terms for the leverage HAR (Corsi and Reno 2012): the mean of the negative part of the
     return, min(r, 0), over the last 1, 5 and 22 days. Values are zero or negative; uses information up
