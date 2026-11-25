@@ -118,14 +118,21 @@ pip install -r requirements.txt -r requirements-dl.txt -r requirements-dev.txt
 PYTHONPATH=src python -m oilfc.data.build    # add --offline to reuse cached raw files
 python -m pytest -q
 python experiments/vol_risk_brent.py ladder-only   # Brent ladders (about 10 minutes)
-python experiments/vol_risk_brent.py wti
+python experiments/vol_risk_brent.py wti ladder-only
+python experiments/vol_risk_brent.py wti risk-only        # WTI VaR and ES backtests
 python experiments/vol_risk_brent.py risk-only
 python experiments/vol_residual_brent.py     # ridge, LightGBM, MLP residuals
 python experiments/vol_exog.py               # new data groups
 python experiments/vol_ovx_timing.py         # OVX(t) versus OVX(t-1)
 python experiments/vol_robustness.py         # sub-periods, Holm correction, calibration (about 10 minutes)
+python experiments/vol_window.py             # rolling-window check (about 15 minutes)
+python experiments/vol_refit.py              # weekly versus monthly refit (a few minutes)
+python experiments/vol_targeting.py          # exploratory volatility targeting
+python experiments/vol_fx.py                 # dollar-index channel
 python experiments/residual_vs_monthly.py kaggle_residual_monthly   # needs results/kaggle_residual_monthly/ (committed)
 python experiments/summarise_vol.py          # writes results/tables/SUMMARY.md
+python experiments/live_run.py && python experiments/live_score.py   # live forecasts (the daily workflow does this)
+python experiments/holdout_final.py         # dry run only: checks the freeze, evaluates nothing
 ```
 
 The transformer experiment runs on a free Kaggle GPU: see [docs/kaggle_transformer_residual.md](docs/kaggle_transformer_residual.md). Its outputs are committed: `results/kaggle_residual_monthly/` (monthly anchor, the reported run) and `results/kaggle_residual/` (the first run with a yearly anchor). Seeds: ridge is deterministic, LightGBM and the MLP use `random_state=0`, the transformer averages seeds 0 to 4. Lint with `python -m ruff check . && python -m ruff format --check .`.
@@ -136,6 +143,8 @@ Verified on Windows: the test suite, lint, the offline data build and every expe
 
 - `v0.1.0`: first working volatility and risk benchmark (Brent and WTI ladders, filtered-simulation VaR/ES, residual models, evaluation library with holdout helpers).
 - `v0.2.0`: the headline result stated under strict OVX timing and checked for robustness (sub-periods, Holm correction, Bartlett variance, calibration, volatility targeting), a monthly-anchor rerun of the learned residuals (null), more data tests (futures, inventories, GPR, EPU, VIX, dollar index: null), leakage guards for every feature builder, the live forward test with a daily GitHub Actions run, a read-only API, and a green CI run.
+- `protocol-frozen` (tag): the evaluation protocol in `configs/protocol.yaml` and ADR 0003, fixed before the holdout run and the live forward test.
+- The earlier thesis work this project grew out of is kept outside the repository as a reference, so there is no separate original-code checkpoint: the first tag is `v0.1.0`.
 
 ## Live forward test
 

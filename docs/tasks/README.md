@@ -9,7 +9,7 @@ Each card is a small piece of the project that **you** write. I provide the goal
 3. Run only that card's tests: `pytest tests/test_<name>.py -q`. They start as `xfail` (expected failure). As you implement them they show up as `XPASS`.
 4. When **all** tests of a card pass, delete the `pytestmark = pytest.mark.xfail(...)` line at the top of the test file. From then on a failure is a real failure and CI will catch it.
 5. Run `ruff check .` and `ruff format .`, then commit with a prefix: `feat:`, `fix:`, `test:`, `docs:`.
-6. Add three lines to `docs/progress_log.md` (built, broke, learned).
+6. Note in your own log what you built, what broke and what you learned.
 7. Ask me to review. I will read your code, point out problems, and then ask you a few questions (the explain-back). The card is done when you can answer them.
 
 If you are stuck for more than 30 minutes, paste the error and what you tried. I will give a hint, not the answer.

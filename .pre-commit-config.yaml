@@ -1,7 +1,7 @@
 # Runs automatically on `git commit` after you run `pre-commit install` once.
 # The same checks run in CI (.github/workflows/ci.yml), so a commit that passes here passes there.
-# Files this project does not own or lint: the old DDP-era note at the repo root and the DDP archive.
-exclude: ^(ddp_report_improvements\.md|prior_work/)
+# Files this project does not own or lint: the DDP archive.
+exclude: ^prior_work/
 
 repos:
   # Fast linter + formatter (replaces flake8, isort and black). `rev` pins the hook version.
