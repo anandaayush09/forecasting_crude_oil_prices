@@ -181,6 +181,9 @@ def test_the_dry_run_checks_the_freeze_and_evaluates_nothing(tmp_path, monkeypat
         raise AssertionError("the dry run must not compute forecasts")
 
     monkeypatch.setattr(script, "check_frozen", lambda root: "a" * 40)
+    monkeypatch.setattr(
+        script, "src_changes_since_freeze", lambda root: []
+    )  # CI clones have no tags
     monkeypatch.setattr(script, "holdout_forecasts", boom)
     monkeypatch.setattr(script, "PANEL", panel_path)
     monkeypatch.setattr(script, "OUT", tmp_path / "holdout_v1.json")
@@ -200,6 +203,9 @@ def test_a_second_run_is_refused_when_the_result_file_exists(tmp_path, monkeypat
     done = tmp_path / "holdout_v1.json"
     done.write_text("{}")
     monkeypatch.setattr(script, "check_frozen", lambda root: "a" * 40)
+    monkeypatch.setattr(
+        script, "src_changes_since_freeze", lambda root: []
+    )  # CI clones have no tags
     monkeypatch.setattr(script, "OUT", done)
     monkeypatch.setattr(sys, "argv", ["holdout_final.py", "--confirm-single-run"])
     with pytest.raises(SystemExit, match="already evaluated"):
