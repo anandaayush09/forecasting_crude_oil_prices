@@ -82,6 +82,7 @@ Full tables: [results/tables/SUMMARY.md](results/tables/SUMMARY.md). Decisions a
 ## Limitations
 
 - **Multiple testing is corrected only for the 30 headline comparisons** (Holm). The wider model ladder, the new-data and residual tables are not corrected, so treat p-values near 0.05 there as suggestive.
+- **No intraday data.** Realised volatility here is built from squared daily returns, a noisy measure; most oil volatility studies use 5-minute realised volatility, which usually helps and may explain part of the gap to published gains. No free multi-year intraday oil series was found (Dukascopy's free export could not be reached and its terms for research use are unclear), so this is left as a limitation. Daily futures ranges are a partial substitute and were tested (see Findings): suggestive at long horizons, not significant.
 - **Few independent windows at long horizons.** At 66 days the 3,350 origins contain about 50 non-overlapping windows, and the Diebold-Mariano variance uses 66 unweighted autocovariances, which is noisy.
 - **One development window of 13.5 years,** a few regimes. Sub-period and ex-2020 results exist for the headline model only. The first 2012 refit has about 1,150 OVX rows.
 - **The evidence depends on the expanding window.** With rolling estimation windows (1,000, 504, 252 days) the 5-day gain remains but most other comparisons lose significance after Holm correction (see Findings). The expanding window uses all history since 1987, which is also how the live test is fitted.
