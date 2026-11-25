@@ -36,6 +36,12 @@ VARIANTS = [
 PLACEBO = "placebo_shuffled_ovx"
 
 
+def one_sided_p(loss_benchmark, loss_model, h):
+    """One-sided DM p-value that the model has the lower expected loss (dm_hln is two-sided)."""
+    stat, p = dm_hln(loss_benchmark, loss_model, h)
+    return p / 2 if stat > 0 else 1 - p / 2
+
+
 def main():
     folder = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "results" / "kaggle_dl_addendum"
     rows, spa = [], {}
@@ -51,7 +57,7 @@ def main():
                 "asset": asset, "horizon": h, "variant": v, "n": len(df),
                 "qlike": q[v].mean(), "qlike_benchmark": q["benchmark"].mean(),
                 "gain_pct": 100 * (1 - q[v].mean() / q["benchmark"].mean()),
-                "dm_p": dm_hln(q["benchmark"], q[v], h)[1],
+                "dm_p": one_sided_p(q["benchmark"], q[v], h),
             })  # fmt: skip
         spa[(asset, h)] = spa_pvalue(
             q["benchmark"], pd.DataFrame({v: q[v] for v in VARIANTS}), block_size=h

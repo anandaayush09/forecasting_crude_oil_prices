@@ -43,6 +43,12 @@ ANCHOR = ["log_rv_5", "log_rv_22", "log_rv_63", "neg_ret_1", "neg_ret_5", "neg_r
 NETS = ("mlp_seq", "gru_seq", "transformer_seq")
 
 
+def one_sided_p(loss_benchmark, loss_model, h):
+    """One-sided DM p-value that the model has the lower expected loss (dm_hln is two-sided)."""
+    stat, p = dm_hln(loss_benchmark, loss_model, h)
+    return p / 2 if stat > 0 else 1 - p / 2
+
+
 def load(asset, panel_path):
     panel = pd.read_parquet(panel_path)
     panel.index = pd.to_datetime(panel.index)
@@ -142,7 +148,7 @@ def main():
         rows.append({
             "variant": m, "n": len(df), "qlike": q[m].mean(), "qlike_benchmark": q["benchmark"].mean(),
             "gain_vs_benchmark_pct": 100 * (1 - q[m].mean() / q["benchmark"].mean()),
-            "dm_p_better": dm_hln(q["benchmark"], q[m], a.h)[1],
+            "dm_p_better": one_sided_p(q["benchmark"], q[m], a.h),
             "mean_alpha": alphas[m].mean() if m in alphas else np.nan,
             "share_alpha_zero": (alphas[m] == 0).mean() if m in alphas else np.nan,
             "mean_gate_weight": weights.loc[df.index].mean() if m == "transformer_gate" else np.nan,
