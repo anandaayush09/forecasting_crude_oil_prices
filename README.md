@@ -131,7 +131,7 @@ python experiments/vol_targeting.py          # exploratory volatility targeting
 python experiments/vol_fx.py                 # dollar-index channel
 python experiments/residual_vs_monthly.py kaggle_residual_monthly   # needs results/kaggle_residual_monthly/ (committed)
 python experiments/summarise_vol.py          # writes results/tables/SUMMARY.md
-python experiments/live_run.py && python experiments/live_score.py   # live forecasts (the daily workflow does this)
+python experiments/live_run.py && python experiments/live_score.py   # the daily workflow does this: run by hand only if you commit live/forecasts at once
 python experiments/holdout_final.py         # dry run only: checks the freeze, evaluates nothing
 ```
 

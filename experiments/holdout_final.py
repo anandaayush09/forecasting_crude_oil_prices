@@ -33,6 +33,7 @@ from oilfc.eval.holdout_final import (  # noqa: E402
     evaluate,
     holdout_forecasts,
     sha256_file,
+    src_changes_since_freeze,
     write_once,
 )
 from oilfc.eval.multiplicity import holm_adjust  # noqa: E402
@@ -66,6 +67,8 @@ def main():
 
     head = check_frozen(ROOT)
     print(f"protocol frozen, HEAD {head[:7]}")
+    changed = src_changes_since_freeze(ROOT)
+    print(f"source files changed since the freeze tag: {changed or 'none'}")
     if OUT.exists():
         sys.exit(f"{OUT} exists: the holdout was already evaluated. Never rerun over it.")
 
@@ -96,6 +99,7 @@ def main():
         "protocol_sha256": sha256_file(PROTOCOL),
         "panel_sha256": sha256_file(PANEL),
         "code_commit": head,
+        "src_files_changed_since_freeze": changed,
         "run_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "holdout_start": str(start.date()),
         "data_end": str(panel.index[-1].date()),

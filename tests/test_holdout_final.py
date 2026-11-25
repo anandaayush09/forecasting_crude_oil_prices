@@ -14,6 +14,7 @@ from oilfc.eval.holdout_final import (
     check_frozen,
     evaluate,
     holdout_forecasts,
+    src_changes_since_freeze,
     write_once,
 )
 
@@ -100,19 +101,42 @@ def test_unknown_model_names_are_rejected():
         holdout_forecasts(r, p["ovx"], 5, "2009-06-01", ("naive", "magic"))
 
 
-def test_the_holdout_procedure_equals_the_development_procedure():
-    """Same data and start date: the holdout function reproduces vol_ovx_timing.forecasts exactly."""
-    sys.path.insert(0, str(ROOT / "experiments"))
+@pytest.fixture(scope="module")
+def development_run():
+    """One development-procedure run on synthetic data, shared by the equivalence tests."""
     spec = importlib.util.spec_from_file_location(
         "vol_ovx_timing", ROOT / "experiments" / "vol_ovx_timing.py"
     )
     dev_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(dev_module)
     p = _panel()
-    dev = dev_module.forecasts("brent", 5, p)
+    return p, dev_module.forecasts("brent", 5, p)
+
+
+def test_the_holdout_procedure_equals_the_development_procedure(development_run):
+    """Same data and start date: the holdout function reproduces vol_ovx_timing.forecasts exactly."""
+    p, dev = development_run
     r = np.log(p["brent_spot"]).diff().dropna()
     new = holdout_forecasts(r, p["ovx"], 5, "2012-01-01")
     cols = ["y", "naive", "har_bc", "lhar_bc", "lhar_ovx_bc_lag1", "garch_t", "gjr_t"]
+    common = dev.index.intersection(new.index)
+    assert len(common) > 800
+    pd.testing.assert_frame_equal(
+        dev.loc[common, cols], new.loc[common, cols], check_exact=False, rtol=1e-9
+    )
+
+
+def test_the_refit_check_with_monthly_blocks_equals_the_development_procedure(development_run):
+    """vol_refit.py keeps its own copy of the log-linear ladder: it must not drift from the headline."""
+    p, dev = development_run
+    spec = importlib.util.spec_from_file_location(
+        "vol_refit", ROOT / "experiments" / "vol_refit.py"
+    )
+    refit = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(refit)
+    r = np.log(p["brent_spot"]).diff().dropna()
+    new = refit.forecasts(r, p["ovx"].reindex(r.index).shift(1), 5, 1, None)
+    cols = ["y", "naive", "har_bc", "lhar_bc", "lhar_ovx_bc_lag1"]
     common = dev.index.intersection(new.index)
     assert len(common) > 800
     pd.testing.assert_frame_equal(
@@ -180,3 +204,17 @@ def test_a_second_run_is_refused_when_the_result_file_exists(tmp_path, monkeypat
     monkeypatch.setattr(sys, "argv", ["holdout_final.py", "--confirm-single-run"])
     with pytest.raises(SystemExit, match="already evaluated"):
         script.main()
+
+
+def test_source_files_changed_after_the_freeze_tag_are_listed(repo):
+    (repo / "src").mkdir()
+    (repo / "src" / "model.py").write_text("x = 1\n")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", "add model")
+    _git(repo, "tag", "-a", "protocol-frozen", "-m", "frozen")
+    assert src_changes_since_freeze(repo) == []
+    (repo / "src" / "model.py").write_text("x = 2\n")
+    (repo / "src" / "new.py").write_text("y = 1\n")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", "change model after the freeze")
+    assert src_changes_since_freeze(repo) == ["src/model.py", "src/new.py"]
