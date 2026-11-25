@@ -1,0 +1,29 @@
+{
+  "args": {
+    "asset": "wti",
+    "h": 66,
+    "device": "auto",
+    "residual_every": 12,
+    "seeds": 5,
+    "epochs": 80,
+    "seq_len": 22,
+    "bound": 0.5,
+    "placebo": true,
+    "test_start": "2012-01-01",
+    "holdout_start": "2025-07-01",
+    "panel": "/kaggle/working/proj/data/processed/panel_daily.parquet",
+    "out": "/kaggle/working/results",
+    "smoke": false
+  },
+  "device": "cuda",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs": 80,
+  "n_splits": 162,
+  "adr": "0004"
+}

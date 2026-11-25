@@ -45,3 +45,7 @@ TTM r2.1 (IBM Granite, Apache-2.0, weights of 2025-01-31, pinned by Hugging Face
 - If every variant is null, the deep-learning section of the paper reports a controlled null with the fixes tried.
 - Any positive cell is labelled exploratory and goes to the live track for confirmation, not into the headline.
 - Departures from this note are recorded as dated amendments here, not by rewriting it.
+
+## Amendments
+
+- 2026-11-25, after the Stage A run: `dm_hln` returns two-sided p-values, and the per-cell summary files written by the Kaggle runs (`dl_addendum_<asset>_<h>d.csv`) therefore carry two-sided values in `dm_p_better`. The registered one-sided p-values (halved when the model is better, one minus half otherwise) are computed by `experiments/dl_addendum_report.py` from the per-origin predictions and are the ones in `results/tables/dl_addendum.csv`. The runner now writes one-sided values too. No registered choice changed.

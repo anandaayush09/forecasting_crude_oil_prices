@@ -518,3 +518,14 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 66d vs naive | 41.4 | 0.191 | 41.6 | 0.19 |
 | WTI 66d vs har_bc | 4.1 | 0.115 | 4.3 | 0.116 |
 | WTI 66d vs lhar_bc | 0.9 | 0.639 | 1.2 | 0.547 |
+
+**Deep-learning addendum: QLIKE gain over the headline benchmark (> 0: better), Holm p over 36 tests, SPA p per cell**
+
+| cell | ridge_window gain % | ridge_window Holm p | mlp_seq gain % | mlp_seq Holm p | gru_seq gain % | gru_seq Holm p | transformer_seq gain % | transformer_seq Holm p | transformer_eqw gain % | transformer_eqw Holm p | transformer_gate gain % | transformer_gate Holm p | placebo_shuffled_ovx gain % | placebo_shuffled_ovx Holm p | SPA p (cell) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| BRENT 22d | -4.71 | 1.0 | -2.1 | 1.0 | -1.17 | 1.0 | -2.71 | 1.0 | -0.56 | 1.0 | -1.07 | 1.0 | -0.94 |  | 0.834 |
+| BRENT 5d | -2.38 | 1.0 | 0.67 | 1.0 | 0.81 | 1.0 | 0.39 | 1.0 | 0.57 | 1.0 | -0.46 | 1.0 | 0.46 |  | 0.251 |
+| BRENT 66d | 1.48 | 1.0 | 2.11 | 1.0 | 6.5 | 1.0 | 2.59 | 1.0 | 1.83 | 1.0 | -0.09 | 1.0 | 3.06 |  | 0.222 |
+| WTI 22d | -0.73 | 1.0 | -5.75 | 1.0 | -5.25 | 1.0 | -2.72 | 1.0 | -0.27 | 1.0 | -2.95 | 1.0 | -0.33 |  | 0.834 |
+| WTI 5d | -2.08 | 1.0 | -0.53 | 1.0 | -0.61 | 1.0 | 0.16 | 1.0 | 0.31 | 1.0 | 0.85 | 1.0 | -0.32 |  | 0.311 |
+| WTI 66d | -1.16 | 1.0 | -2.59 | 1.0 | 0.99 | 1.0 | -3.73 | 1.0 | -1.59 | 1.0 | -0.38 | 1.0 | -3.89 |  | 0.362 |
