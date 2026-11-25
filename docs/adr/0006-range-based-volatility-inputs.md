@@ -33,3 +33,11 @@ As in ADR 0005, with the family size changed: 3 candidates times 6 cells = 18 on
 - A winner is a development-data result selected by a pre-registered rule, not a confirmed result.
 - Every candidate and cell is reported.
 - Departures from this note are recorded as dated amendments here.
+
+## Outcome (2026-11-25)
+
+No candidate improves the headline under the rule: all 18 Holm-adjusted p-values are 1.0, the SPA p per cell is between 0.08 and 0.43, and no candidate is significantly worse in any cell. The point gains are mostly positive: Brent 22 days +4.2% to +8.6%, Brent 66 days +10.2% to +17.8%, WTI 22 days +0.8% to +5.0%, WTI 66 days +4.6% for R3 only (R1 and R2 are 3% to 7% worse there); the smallest one-sided p is about 0.10. The headline stays. The consistent sign at the longer horizons, with too little power to confirm it, is the reason to look for a better volatility measure (intraday data) next, not a result. Results: `results/tables/range_candidates.csv`.
+
+## Amendments
+
+- 2026-11-25, before any model was run: the downloaded series miss about 1% of days (80 of 6,674 rows for WTI, 58 of 4,870 for Brent), and a plain rolling mean would discard most 63-day windows. Window means use the days that are present, and a window needs at least 80% of its days (4 of 5, 18 of 22, 51 of 63); otherwise the feature is missing. Dates were checked against the EIA spot dates: daily return correlation at offset 0 is 0.91 for WTI and 0.76 for Brent, and about 0 at offsets of one day either way.

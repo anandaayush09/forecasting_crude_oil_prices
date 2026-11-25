@@ -18,6 +18,7 @@ import pytest
 
 from oilfc.eval.targets import past_realized_vol
 from oilfc.features.exog import exogenous_features, fx_features
+from oilfc.features.range_vol import range_vol_design
 from oilfc.features.vol import CHANNELS, daily_channels, lag_window
 from oilfc.models.baselines.vol import ewma_vol, har_design, leverage_design, ovx_features
 
@@ -69,6 +70,17 @@ FEATURES = {
     "fx_features": lambda p, r: fx_features(p, p.index),
     "ovx_features": lambda p, r: ovx_features(
         har_design(r, p["ovx"].shift(1))["log_ovx"], har_design(r)["log_rv_22"]
+    ),
+    "range_vol_design": lambda p, r: range_vol_design(
+        pd.DataFrame(
+            {
+                "open": p["wti_fut1"],
+                "high": p["wti_fut1"] * 1.01,
+                "low": p["wti_fut1"] * 0.99,
+                "close": p["wti_fut1"],
+            }
+        ),
+        p.index,
     ),
     "daily_channels_lag1": lambda p, r: daily_channels(p, r, ovx_lag=1),
 }
