@@ -4,6 +4,19 @@ import numpy as np
 from scipy import stats
 
 
+def dm_better_p(loss_benchmark, loss_model, h: int) -> float:
+    """One-sided p-value that the model has the lower expected loss than the benchmark.
+
+    Built on `dm_hln`, which is two-sided: half its p when the model has the lower mean loss, one minus
+    half otherwise (so a model that is clearly worse gets a p near 1). NaN if the loss difference has zero
+    variance. 1 minus this value is the one-sided p that the model is worse.
+    """
+    stat, p = dm_hln(loss_benchmark, loss_model, h)
+    if not np.isfinite(p):
+        return float("nan")
+    return p / 2 if stat > 0 else 1 - p / 2
+
+
 def dm_hln(loss_a, loss_b, h: int, kernel: str = "rectangular") -> tuple[float, float]:
     """Diebold-Mariano test with the Harvey-Leybourne-Newbold small-sample correction.
 
