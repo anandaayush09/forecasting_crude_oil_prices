@@ -9,17 +9,19 @@ from oilfc.models.baselines.vol import har_design
 CHANNELS = ["ret_1", "abs_ret", "log_rv_5", "log_rv_22", "log_ovx", "log_vix"]
 
 
-def daily_channels(panel: pd.DataFrame, returns: pd.Series) -> pd.DataFrame:
+def daily_channels(panel: pd.DataFrame, returns: pd.Series, ovx_lag: int = 0) -> pd.DataFrame:
     """The per-day channels in CHANNELS plus the HAR + OVX design columns (all causal).
 
     panel needs the columns `ovx` and `vix` (as in data/processed/panel_daily.parquet); `vix` is
     forward-filled (it has different holidays), which only carries past values forward.
+    ovx_lag: trading days by which OVX and VIX are delayed. Both are New York closing values, later
+    than the Brent price stamp, so ovx_lag=1 is the strict timing of the headline model.
     """
-    design = har_design(returns, panel["ovx"].reindex(returns.index))
+    design = har_design(returns, panel["ovx"].reindex(returns.index).shift(ovx_lag))
     out = design.copy()
     out["ret_1"] = returns
     out["abs_ret"] = returns.abs()
-    out["log_vix"] = np.log(panel["vix"].reindex(returns.index).ffill())
+    out["log_vix"] = np.log(panel["vix"].reindex(returns.index).ffill().shift(ovx_lag))
     return out
 
 

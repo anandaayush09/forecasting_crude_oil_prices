@@ -67,6 +67,7 @@ FEATURES = {
     "lag_window": lambda p, r: lag_window(daily_channels(p, r), CHANNELS, 16),
     "exogenous_features": lambda p, r: exogenous_features(p, p.index),
     "fx_features": lambda p, r: fx_features(p, p.index),
+    "daily_channels_lag1": lambda p, r: daily_channels(p, r, ovx_lag=1),
 }
 
 
