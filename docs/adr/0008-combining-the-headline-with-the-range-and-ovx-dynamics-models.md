@@ -42,3 +42,7 @@ As in ADR 0005 and 0006, with a family of 18: 3 candidates times 6 cells (Brent 
 - Every candidate and cell is reported, including the failures.
 - Intraday realised volatility has no usable free source here (see the README limitations), so it is not part of this study.
 - Departures from this note are recorded as dated amendments here.
+
+## Outcome (2026-11-27)
+
+No candidate improves the headline: the smallest Holm-adjusted p over the 18 tests is 0.26, and M2 is significantly worse than the headline at WTI 5 days (one-sided p 0.0045). The headline stays. M1 (headline and R3) has a positive QLIKE gain in all six cells, from +0.8% (WTI 5 days) to +6.1% (Brent 66 days), and so is M3 (+0.3% to +5.8%). The smallest unadjusted one-sided p is 0.015 (M1, Brent 5 days, SPA p of that cell 0.009), which does not survive Holm. M2 (headline and C3) gains at most +2.2% (Brent 66 days) and is negative in three cells. Results: `results/tables/combine_candidates.csv`.

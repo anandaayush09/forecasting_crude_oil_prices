@@ -551,3 +551,14 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 5d | -1.8 | 0.736 | 0.51 | 0.423 | 1.1 | 0.136 | 0.426 |
 | WTI 22d | 0.85 | 0.416 | 5.0 | 0.175 | 3.53 | 0.097 | 0.14 |
 | WTI 66d | -6.57 | 0.914 | -3.21 | 0.915 | 4.59 | 0.171 | 0.33 |
+
+**Combinations with the headline (ADR 0008): QLIKE gain over the headline (> 0: better), Holm p over 18 tests, SPA p per cell**
+
+| cell | M1_headline_r3 gain % | M1_headline_r3 Holm p | M2_headline_c3 gain % | M2_headline_c3 Holm p | M3_headline_r3_c3 gain % | M3_headline_r3_c3 Holm p | SPA p (cell) |
+|---|---|---|---|---|---|---|---|
+| BRENT 5d | 1.58 | 0.264 | -0.14 | 1.0 | 1.21 | 0.29 | 0.009 |
+| BRENT 22d | 3.63 | 0.833 | 0.29 | 1.0 | 3.06 | 0.826 | 0.042 |
+| BRENT 66d | 6.08 | 1.0 | 2.23 | 1.0 | 5.81 | 1.0 | 0.108 |
+| WTI 5d | 0.8 | 0.833 | -0.38 | 1.0 | 0.34 | 1.0 | 0.039 |
+| WTI 22d | 2.2 | 0.833 | -0.14 | 1.0 | 1.48 | 1.0 | 0.062 |
+| WTI 66d | 2.45 | 1.0 | 0.05 | 1.0 | 1.73 | 1.0 | 0.153 |
