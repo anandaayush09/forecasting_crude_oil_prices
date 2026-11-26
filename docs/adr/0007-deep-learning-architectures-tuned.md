@@ -43,7 +43,7 @@ Models of the thesis that are not run, with the reason:
 - **Data:** in each of the six cells, the training rows of the first monthly split only (their targets end before 2012-01-01). The first 80% of those rows fit the net, h rows are skipped, and the rest validate.
 - **Objective:** the mean over the six cells of the ratio of the net's validation loss to the anchor's validation loss, with the QLIKE-consistent loss. Each architecture gets one shared set of hyperparameters. Pooling the cells reduces the noise of the short pre-2012 sample.
 - **Search:** Optuna TPE sampler with seed 0, 30 trials per architecture, 2 net seeds per trial.
-- **Space:** window {22, 44, 66}, width {16, 32, 64}, depth {1, 2, 3}, dropout in [0, 0.3], learning rate in [3e-4, 1e-2] (log scale), weight decay in [1e-4, 1e-1] (log scale), bound {0.25, 0.5}, plus at most one architecture-specific choice: attention heads {2, 4}, or kernel size {2, 3} for TCN. N-HiTS ignores the window choice and uses the largest pool size that divides it.
+- **Space:** window {22, 44, 66}, width {16, 32, 64}, depth {1, 2, 3}, dropout in [0, 0.3], learning rate in [3e-4, 1e-2] (log scale), weight decay in [1e-4, 1e-1] (log scale), bound {0.25, 0.5}, plus at most one architecture-specific choice: attention heads {2, 4}, or kernel size {2, 3} for TCN.
 - **Output:** `results/dl_arch/hparams.json` and `results/dl_arch/tuning_trials.csv`, committed before the main run starts.
 - **Stated limit:** the validation block at 66 days holds about 150 overlapping rows, so tuning at that horizon is noisy.
 
@@ -64,3 +64,7 @@ Models of the thesis that are not run, with the reason:
 - If every architecture is null, the deep-learning section of the paper reports a second controlled null, with tuning and wider inputs as the answers to the two objections to the first.
 - The tuning period is the only place where the net's settings are chosen. No setting is changed after the first main run.
 - Departures from this note are recorded as dated amendments here, not by rewriting it.
+
+## Amendments
+
+- 2026-11-26, before any tuning or run: the N-HiTS pooling uses ceil mode, so any window length works and the window choice applies to N-HiTS like to the other architectures (this replaces the sentence in the search space that said N-HiTS ignores the window choice). The iTransformer adds a learned embedding per channel to its tokens, because attention and the mean over tokens would otherwise not tell the channels apart. Neither change affects the success rule.

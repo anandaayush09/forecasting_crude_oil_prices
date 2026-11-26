@@ -3,10 +3,15 @@
 import numpy as np
 import pandas as pd
 
+from oilfc.features.exog import exogenous_features, fx_features
 from oilfc.models.baselines.vol import har_design
 
 # Per-day channels fed to the sequence models. Every value at t uses information up to and including t.
 CHANNELS = ["ret_1", "abs_ret", "log_rv_5", "log_rv_22", "log_ovx", "log_vix"]
+# ADR 0007: the six channels plus inventories, geopolitical risk, policy uncertainty and the dollar.
+CHANNELS_EXT = CHANNELS + [
+    "stocks_chg_4w", "stocks_dev_1y", "log_gpr", "log_epu", "usd_chg_22", "log_usd_vol_22",
+]  # fmt: skip
 
 
 def daily_channels(panel: pd.DataFrame, returns: pd.Series, ovx_lag: int = 0) -> pd.DataFrame:
@@ -23,6 +28,20 @@ def daily_channels(panel: pd.DataFrame, returns: pd.Series, ovx_lag: int = 0) ->
     out["abs_ret"] = returns.abs()
     out["log_vix"] = np.log(panel["vix"].reindex(returns.index).ffill().shift(ovx_lag))
     return out
+
+
+def dl_channels(panel: pd.DataFrame, returns: pd.Series) -> pd.DataFrame:
+    """The CHANNELS_EXT columns on the return dates, plus the HAR + OVX design columns (all causal).
+
+    OVX and VIX are lagged one trading day (the strict timing of the headline). The inventory, GPR, EPU
+    and dollar series are already aligned to their release dates in the panel, so each value is public by
+    the origin.
+    """
+    out = daily_channels(panel, returns, ovx_lag=1)
+    extra = exogenous_features(panel, returns.index)[
+        ["stocks_chg_4w", "stocks_dev_1y", "log_gpr", "log_epu"]
+    ]
+    return out.join(extra).join(fx_features(panel, returns.index))
 
 
 def lag_window(frame: pd.DataFrame, channels: list[str], seq_len: int) -> pd.DataFrame:
