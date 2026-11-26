@@ -56,3 +56,25 @@ def test_every_encoder_learns_a_simple_pattern_in_the_newest_day(arch):
 def test_an_unknown_architecture_is_rejected():
     with pytest.raises(ValueError):
         build_encoder("autoformer", 22, CH)
+
+
+def test_regressor_params_pass_the_tuned_settings_through():
+    from oilfc.models.dl.encoders import regressor_params
+
+    hp = dict(
+        window=44, width=32, depth=2, dropout=0.1, lr=1e-3, weight_decay=1e-2, bound=0.25, kernel=3
+    )
+    p = regressor_params(hp, CH)
+    assert (
+        p["seq_len"] == 44 and p["n_channels"] == CH and p["bound"] == 0.25 and p["loss"] == "qlike"
+    )
+    assert p["arch_kwargs"] == dict(width=32, depth=2, kernel=3)
+    reg = SeqResidualRegressor(arch="tcn", epochs=1, seeds=(0,), device="cpu", **p)
+    assert reg.n_parameters() > 0
+
+
+def test_the_input_channels_exist_and_the_exogenous_ones_follow_the_six_base_channels():
+    from oilfc.features.vol import CHANNELS, CHANNELS_EXT
+
+    assert CHANNELS_EXT[: len(CHANNELS)] == CHANNELS and len(CHANNELS_EXT) == 12
+    assert len(set(CHANNELS_EXT)) == 12
