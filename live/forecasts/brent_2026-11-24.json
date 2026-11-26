@@ -1,0 +1,39 @@
+{
+ "content": {
+  "asset": "brent",
+  "code_version": "0de7334ec6fade7144b84b8bf640f37a018eadc6",
+  "horizons": {
+   "22": {
+    "garch_t": 0.63813049,
+    "gjr_t": 0.65957335,
+    "har_bc": 0.60410877,
+    "lhar_bc": 0.622259,
+    "lhar_ovx_bc_lag1": 0.50016974,
+    "naive": 0.79245429
+   },
+   "5": {
+    "garch_t": 0.64180288,
+    "gjr_t": 0.66553306,
+    "har_bc": 0.60142905,
+    "lhar_bc": 0.60666847,
+    "lhar_ovx_bc_lag1": 0.51816968,
+    "naive": 0.79245429
+   },
+   "66": {
+    "garch_t": 0.62763648,
+    "gjr_t": 0.64198272,
+    "har_bc": 0.57889764,
+    "lhar_bc": 0.58391086,
+    "lhar_ovx_bc_lag1": 0.47582876,
+    "naive": 0.79245429
+   }
+  },
+  "n_returns": 9136,
+  "origin_date": "2026-11-24",
+  "ovx_date_used": "2026-11-23",
+  "ovx_value_used": 49.19,
+  "run_utc": "2026-11-26T02:37:56Z",
+  "spec_version": "1"
+ },
+ "sha256": "0a6812cc0281750e0566a42511bb1945a17759a092e52c887887c39ed1171188"
+}
