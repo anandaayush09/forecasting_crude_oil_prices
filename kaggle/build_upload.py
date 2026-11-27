@@ -3,8 +3,8 @@
     .venv/Scripts/python.exe kaggle/build_upload.py
 
 Upload the zip as a Kaggle dataset named `oilfc-residual` (Datasets > New Dataset > upload the file),
-then open notebooks/kaggle_transformer_residual.ipynb, kaggle_dl_addendum.ipynb or kaggle_dl_arch.ipynb in a Kaggle
-notebook with that dataset attached (a new version of the same dataset works for all three).
+then open notebooks/kaggle_transformer_residual.ipynb, kaggle_dl_addendum.ipynb, kaggle_dl_arch.ipynb or kaggle_dl_pooled.ipynb in a Kaggle
+notebook with that dataset attached (a new version of the same dataset works for all four).
 """
 
 import zipfile
@@ -16,15 +16,18 @@ FILES = [
     ROOT / "experiments" / "vol_residual_seq.py",
     ROOT / "experiments" / "vol_dl_addendum.py",
     ROOT / "experiments" / "vol_dl_arch.py",
+    ROOT / "experiments" / "vol_dl_pooled.py",
     ROOT / "results" / "dl_arch" / "hparams.json",
     ROOT / "data" / "processed" / "panel_daily.parquet",
+    ROOT / "data" / "processed" / "panel_companions.parquet",
 ]
 
 README = """oilfc-residual: code and data for notebooks/kaggle_transformer_residual.ipynb.
 src/oilfc/        research code (pure Python; torch, pandas, scikit-learn, scipy needed; `arch` optional)
-experiments/      vol_residual_seq.py, vol_dl_addendum.py and vol_dl_arch.py (the experiments)
+experiments/      vol_residual_seq.py, vol_dl_addendum.py, vol_dl_arch.py and vol_dl_pooled.py (the experiments)
 results/dl_arch/  hparams.json (tuned before 2012, read by vol_dl_arch.py)
-data/processed/   panel_daily.parquet (Brent, WTI, OVX, VIX, ... with release-date alignment)
+data/processed/   panel_daily.parquet (Brent, WTI, OVX, VIX, ... with release-date alignment) and
+                  panel_companions.parquet (the six Stage B companions and EVZ, dated at availability)
 """
 
 
