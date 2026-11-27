@@ -68,3 +68,7 @@ Models of the thesis that are not run, with the reason:
 ## Amendments
 
 - 2026-11-26, before any tuning or run: the N-HiTS pooling uses ceil mode, so any window length works and the window choice applies to N-HiTS like to the other architectures (this replaces the sentence in the search space that said N-HiTS ignores the window choice). The iTransformer adds a learned embedding per channel to its tokens, because attention and the mean over tokens would otherwise not tell the channels apart. Neither change affects the success rule.
+
+## Outcome (2026-11-27)
+
+No architecture helps in any cell: 0 of 36 Holm tests pass (every Holm-adjusted p is 1.0) and the SPA p per cell lies between 0.15 and 0.67. The benchmark QLIKE and the number of origins in each cell equal those of ADR 0004. 27 of the 36 raw gains are positive. The largest is TiDE at Brent 66 days (+14.3%) and the smallest one-sided p is 0.16 (TFT, Brent 66 days). Nine of the 36 raw gains are negative, and the Informer averages -0.7% across cells. The Informer had the lowest mean validation ratio in tuning (0.83) and the weakest test result, so a good validation loss before 2012 did not predict the test period. The ridge control on the 12-channel window has its largest gain at WTI 22 days (+9.3%, one-sided p 0.12), also not significant. The headline stays. Results: `results/tables/dl_arch.csv`.

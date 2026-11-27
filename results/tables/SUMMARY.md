@@ -530,6 +530,17 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 5d | -2.08 | 1.0 | -0.53 | 1.0 | -0.61 | 1.0 | 0.16 | 1.0 | 0.31 | 1.0 | 0.85 | 1.0 | -0.32 |  | 0.311 |
 | WTI 66d | -1.16 | 1.0 | -2.59 | 1.0 | 0.99 | 1.0 | -3.73 | 1.0 | -1.59 | 1.0 | -0.38 | 1.0 | -3.89 |  | 0.362 |
 
+**Tuned architectures (ADR 0007): QLIKE gain over the headline benchmark (> 0: better), Holm p over 36 tests, SPA p per cell**
+
+| cell | nhits gain % | nhits Holm p | tide gain % | tide Holm p | itransformer gain % | itransformer Holm p | tcn gain % | tcn Holm p | tft gain % | tft Holm p | informer gain % | informer Holm p | ridge_window gain % | ridge_window Holm p | SPA p (cell) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| BRENT 22d | 0.83 | 1.0 | 3.88 | 1.0 | 4.62 | 1.0 | 7.6 | 1.0 | 3.42 | 1.0 | -3.5 | 1.0 | 1.01 |  | 0.181 |
+| BRENT 5d | 0.7 | 1.0 | 1.11 | 1.0 | 1.16 | 1.0 | 0.77 | 1.0 | 0.84 | 1.0 | 0.98 | 1.0 | -2.3 |  | 0.253 |
+| BRENT 66d | 4.27 | 1.0 | 14.31 | 1.0 | 6.84 | 1.0 | 7.64 | 1.0 | 10.49 | 1.0 | 1.73 | 1.0 | 5.03 |  | 0.153 |
+| WTI 22d | 0.95 | 1.0 | -0.18 | 1.0 | 3.44 | 1.0 | 1.77 | 1.0 | -2.75 | 1.0 | 0.13 | 1.0 | 9.27 |  | 0.319 |
+| WTI 5d | 0.08 | 1.0 | 0.02 | 1.0 | -0.19 | 1.0 | -1.36 | 1.0 | 0.03 | 1.0 | -1.57 | 1.0 | -1.76 |  | 0.666 |
+| WTI 66d | -1.08 | 1.0 | 3.56 | 1.0 | 4.11 | 1.0 | 1.0 | 1.0 | -0.43 | 1.0 | -2.19 | 1.0 | 3.65 |  | 0.191 |
+
 **Headline-improvement candidates (ADR 0005): QLIKE gain over the headline (> 0: better), Holm p over 30 tests, SPA p per cell**
 
 | cell | C1_qlike gain % | C1_qlike Holm p | C2_wls gain % | C2_wls Holm p | C3_ovx_dynamics gain % | C3_ovx_dynamics Holm p | C4_ovx_dynamics_qlike gain % | C4_ovx_dynamics_qlike Holm p | C5_combination gain % | C5_combination Holm p | SPA p (cell) |
