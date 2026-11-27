@@ -1,0 +1,99 @@
+{
+  "args": {
+    "asset": "brent",
+    "h": 22,
+    "device": "auto",
+    "residual_every": 12,
+    "seeds": 5,
+    "epochs": 80,
+    "test_start": "2012-01-01",
+    "holdout_start": "2025-07-01",
+    "hparams": "/kaggle/working/proj/results/dl_arch/hparams.json",
+    "panel": "/kaggle/working/proj/data/processed/panel_daily.parquet",
+    "out": "/kaggle/working/results",
+    "smoke": false
+  },
+  "device": "cuda",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "epochs": 80,
+  "n_splits": 162,
+  "hparams": {
+    "nhits": {
+      "window": 66,
+      "width": 32,
+      "depth": 1,
+      "dropout": 0.1994957743289652,
+      "lr": 0.002499813230428178,
+      "weight_decay": 0.0032490666164006086,
+      "bound": 0.25,
+      "best_value": 0.8675416149150762,
+      "trials": 30
+    },
+    "tide": {
+      "window": 44,
+      "width": 16,
+      "depth": 3,
+      "dropout": 0.1189517222540954,
+      "lr": 0.006590746170895266,
+      "weight_decay": 0.005543941231681782,
+      "bound": 0.25,
+      "best_value": 0.9476183790544863,
+      "trials": 30
+    },
+    "itransformer": {
+      "window": 66,
+      "width": 32,
+      "depth": 2,
+      "dropout": 0.21318578974367683,
+      "lr": 0.001536671458538279,
+      "weight_decay": 0.04907466407370838,
+      "bound": 0.25,
+      "heads": 4,
+      "best_value": 0.944484565063456,
+      "trials": 30
+    },
+    "tcn": {
+      "window": 66,
+      "width": 32,
+      "depth": 3,
+      "dropout": 0.1624203691567408,
+      "lr": 0.0021769187573326054,
+      "weight_decay": 0.005615369448263272,
+      "bound": 0.5,
+      "kernel": 3,
+      "best_value": 0.8858649230624662,
+      "trials": 30
+    },
+    "tft": {
+      "window": 66,
+      "width": 32,
+      "depth": 2,
+      "dropout": 0.18224689794912877,
+      "lr": 0.006875159281422892,
+      "weight_decay": 0.0004518467522567008,
+      "bound": 0.5,
+      "heads": 4,
+      "best_value": 0.9006710565051739,
+      "trials": 30
+    },
+    "informer": {
+      "window": 44,
+      "width": 64,
+      "depth": 2,
+      "dropout": 0.17131161439309175,
+      "lr": 0.004903200518477542,
+      "weight_decay": 0.002619945600048091,
+      "bound": 0.5,
+      "heads": 4,
+      "best_value": 0.8294122848878991,
+      "trials": 30
+    }
+  },
+  "adr": "0007"
+}
