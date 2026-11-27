@@ -69,3 +69,7 @@ As in ADR 0005, 0006 and 0008, with a family of 9: 3 candidates times 3 cells (W
 - A null is a plausible outcome and would close the free-data question for intraday inputs, with the stated limit of a short sample and one asset.
 - Raw VOLARE data is never committed. The experiment reads it from `data/raw/volare/`, and the tests use synthetic series only.
 - Departures from this note are recorded as dated amendments here.
+
+## Amendments
+
+- 2026-11-27, before any model was run: the feature columns are named `log_irv_<w>` (from `rv5`) and `log_irvss_<w>` (from `rv5_ss`), not `log_rv_<w>` and `log_rvss_<w>` as written above, because `log_rv_<w>` is already the return-based HAR column of the headline. The windowing (5, 22 and 63 days, shifted one day, at least 80% of the days) is the code of ADR 0006, now shared in `windowed_log_vol`, and its output for the range features is unchanged. The runner checks the SHA-256 of the archive's CSV against the value above and stops if it differs. H-short sets the headline's inputs to missing on rows where the three `log_irv` terms are missing, so it trains and tests on the candidates' rows.
