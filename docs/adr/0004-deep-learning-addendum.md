@@ -46,6 +46,29 @@ TTM r2.1 (IBM Granite, Apache-2.0, weights of 2025-01-31, pinned by Hugging Face
 - Any positive cell is labelled exploratory and goes to the live track for confirmation, not into the headline.
 - Departures from this note are recorded as dated amendments here, not by rewriting it.
 
+## Stage B outcome (2026-11-27)
+
+The pooled panel (8 series, series list and design as in the amendments below) was run once on Kaggle, 5 seeds, in 6 cells (Brent and WTI at 5, 22 and 66 days). No pooled variant helps in any cell: all 12 Holm-adjusted p-values are 0.44 or higher (smallest 0.44, pooled MLP at Brent 66 days), and the cells' SPA p-values are 0.048 (Brent 22 days) and 0.067 to 0.47 elsewhere. A variant counts as helping only if its Holm p and the cell's SPA p are both below 0.05, so the single SPA p under 0.05 (Brent 22 days, with Holm p 0.485 for both variants) does not count.
+
+QLIKE gain of each pooled variant over the Stage A per-asset version of the same architecture (the registered comparison, one-sided raw p in brackets):
+
+| cell | pooled MLP | pooled transformer |
+|---|---|---|
+| Brent 5 days | +0.2% (0.40) | +1.0% (0.07) |
+| Brent 22 days | +9.3% (0.046) | +7.8% (0.044) |
+| Brent 66 days | +3.6% (0.037) | +7.5% (0.12) |
+| WTI 5 days | +0.4% (0.37) | -0.6% (0.94) |
+| WTI 22 days | +6.0% (0.07) | +0.9% (0.39) |
+| WTI 66 days | +0.2% (0.42) | +4.1% (0.18) |
+
+Three raw p-values are under 0.05, none survives the correction for 12 tests. Pooling does lower QLIKE against the per-asset nets in 11 of 12 comparisons, but those per-asset nets were themselves worse than the headline in 7 of the 12 (for example -2.1% and -2.7% at Brent 22 days, -5.7% at WTI 22 days), so part of the gain is a weak reference being repaired.
+
+Against the headline (outside the family, descriptive): the pooled variants gain +0.8% to +9.9% at Brent and -2.3% to +0.6% at WTI, with one-sided p between 0.16 and 0.97. The best, the pooled transformer at Brent 66 days (+9.9%, p 0.19), is not distinguishable from noise: the shuffled-OVX placebo of Stage A reached +3.1% in a cell of the same kind. Nothing here enters the headline or the live track. As stated up front, 8 series is well below the roughly 40 where pooling has paid off in published work, and the positive Brent gains are a lead for a larger panel, not a result.
+
+One disclosure: while checking the metadata of a partial download of the result files (3 of 6 cells), the Brent 22-day table was printed, before the full family existed. It changed nothing: the series, the design and the tests were fixed above before any run, and the report was run only once all 6 cells were in.
+
+Results: `results/tables/dl_pooled.csv` (summary), `results/dl_pooled/` (per-origin predictions and run settings).
+
 ## Amendments
 
 - 2026-11-25, after the Stage A run: `dm_hln` returns two-sided p-values, and the per-cell summary files written by the Kaggle runs (`dl_addendum_<asset>_<h>d.csv`) therefore carry two-sided values in `dm_p_better`. The registered one-sided p-values (halved when the model is better, one minus half otherwise) are computed by `experiments/dl_addendum_report.py` from the per-origin predictions and are the ones in `results/tables/dl_addendum.csv`. The runner now writes one-sided values too. No registered choice changed.
