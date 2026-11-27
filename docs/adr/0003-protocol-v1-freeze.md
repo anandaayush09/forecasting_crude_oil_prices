@@ -38,6 +38,18 @@
 - **Cost of freezing too early?** A rule later found to be wrong stays for the confirmation tests. Protocol v2 fixes that but costs credibility.
 - **What would a hostile reviewer attack first?** That the headline model was chosen after seeing development results. The answer is the live test and the single holdout run, plus the Holm-corrected tables that show where the claim does not hold (the 22-day gain survives the Holm correction only against some comparators, and the 66-day gain only against naive).
 
+## Outcome of the holdout run (2026-11-27)
+
+`experiments/holdout_final.py --confirm-single-run` was run once, at Aayush's request, at code commit `473ffe0`. The record is `results/holdout/holdout_v1.json` (SHA-256 of its content `fb423f8c77201494b4b0366cfb45339fd83b93aeaec0fac708f3a45fc9b9974d`), written once and never overwritten. Origins run from 2025-07-01 to the data end of 2026-11-17, with 276 to 347 origins per cell with a realised target.
+
+Before the run, 17 source files differed from the freeze tag (the dry run lists them, and the record stores the list). Because of that, the headline path and the five comparators were recomputed on development data with the code of `protocol-frozen` (a separate checkout) and with the code at the run. Every forecast matched exactly (largest relative difference 0.0, 6 cells, 6 models), and so did `holdout_forecasts`, the function the run uses.
+
+Result: the headline `lhar_ovx_bc_lag1` has a lower mean QLIKE than every comparator in all 30 comparisons (naive, HAR, leverage HAR, GARCH-t, GJR-t at 5, 22 and 66 days on both assets), with gains from 1.6% (GARCH-t, Brent 22 days) to 72.2% (naive, WTI 66 days). No comparison is significant. The two-sided Diebold-Mariano p-values are 0.17 to 0.97, and all 30 Holm-adjusted p-values are 1.0. Halving the two-sided p for the one-sided claim gives 0.085 at the smallest, and Holm still gives 1.0.
+
+Reading: the point estimates favour the headline in every cell, but 15 months of holdout data cannot confirm it. With overlapping targets, the 66-day cells hold only about four non-overlapping blocks, and the other cells have low power too. The result does not support the claim that the headline beats the benchmarks, and it does not contradict it. Together with the early aggregate look at these data (BUGS B-002, DECISIONS D-004), the live forward test remains the only pristine evidence.
+
+A docstring of `evaluate()` in `src/oilfc/eval/holdout_final.py` called `dm_p` one-sided. It is the two-sided `dm_hln` p-value, which is what this protocol names as the primary test. The record is correct as written, and the docstring was corrected after the run (documentation only).
+
 ## Consequences
 
 - The final holdout script can be written and run once after the tag.
