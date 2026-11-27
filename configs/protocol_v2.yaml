@@ -1,5 +1,5 @@
-# PROTOCOL v2, DRAFT 2026-11-27 (ADR 0010). Not frozen until Aayush accepts ADR 0010 and the tag
-# `protocol-v2-frozen` is created.
+# PROTOCOL v2, accepted by Aayush 2026-11-27 together with ADR 0010. Frozen by the tag
+# `protocol-v2-frozen`; any later change needs protocol v3 and a dated note in ADR 0003.
 #
 # v2 changes nothing in v1 (configs/protocol.yaml, tag `protocol-frozen`). It adds one secondary live
 # track. The primary live success rule, the headline, the holdout and the development protocol stay as

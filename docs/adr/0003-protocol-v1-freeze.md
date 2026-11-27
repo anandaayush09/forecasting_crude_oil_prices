@@ -57,4 +57,4 @@ A docstring of `evaluate()` in `src/oilfc/eval/holdout_final.py` called `dm_p` o
 
 ## Amendments
 
-- 2026-11-27: protocol v2 is proposed in ADR 0010 (`configs/protocol_v2.yaml`). It leaves v1 unchanged, including the primary live success rule, and adds one secondary live track for a foundation model. It takes effect only when ADR 0010 is accepted and the tag `protocol-v2-frozen` exists.
+- 2026-11-27: protocol v2 was accepted with ADR 0010 (`configs/protocol_v2.yaml`). It leaves v1 unchanged, including the primary live success rule, and adds one secondary live track for a foundation model. It is frozen by the tag `protocol-v2-frozen`.

@@ -1,6 +1,6 @@
 # 0010. Foundation-model live track and protocol v2: design fixed before any forecast is made
 
-- Status: proposed (2026-11-27), waiting for Aayush's acceptance. Nothing is run and no tag exists until it is accepted.
+- Status: accepted (Aayush, 2026-11-27). Nothing is run yet. The tag `protocol-v2-frozen` marks the commit that carries this status.
 - Date: 2026-11-27
 
 ## Context
