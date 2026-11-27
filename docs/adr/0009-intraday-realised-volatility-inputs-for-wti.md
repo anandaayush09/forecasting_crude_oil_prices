@@ -1,6 +1,6 @@
 # 0009. Intraday realised volatility inputs for WTI: candidates, controls and rule, fixed before any model is run
 
-- Status: draft (for Aayush's review)
+- Status: accepted (Aayush, 2026-11-27)
 - Date: 2026-11-27
 
 ## Context
