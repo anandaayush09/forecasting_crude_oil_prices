@@ -574,6 +574,17 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 22d | 2.2 | 0.833 | -0.14 | 1.0 | 1.48 | 1.0 | 0.062 |
 | WTI 66d | 2.45 | 1.0 | 0.05 | 1.0 | 1.73 | 1.0 | 0.153 |
 
+**Pooled nets (Stage B): QLIKE gain over the per-asset net of Stage A (> 0: better), Holm p over 12 tests, gain over the headline outside the family, SPA p per cell**
+
+| cell | pooled_mlp gain vs per-asset % | pooled_mlp Holm p | pooled_mlp gain vs headline % | pooled_transformer gain vs per-asset % | pooled_transformer Holm p | pooled_transformer gain vs headline % | SPA p (cell) |
+|---|---|---|---|---|---|---|---|
+| BRENT 22d | 9.25 | 0.485 | 7.34 | 7.8 | 0.485 | 5.31 | 0.048 |
+| BRENT 5d | 0.15 | 1.0 | 0.82 | 1.03 | 0.639 | 1.42 | 0.067 |
+| BRENT 66d | 3.62 | 0.44 | 5.66 | 7.5 | 0.816 | 9.9 | 0.107 |
+| WTI 22d | 6.0 | 0.639 | 0.6 | 0.91 | 1.0 | -1.79 | 0.09 |
+| WTI 5d | 0.38 | 1.0 | -0.15 | -0.6 | 1.0 | -0.44 | 0.469 |
+| WTI 66d | 0.24 | 1.0 | -2.34 | 4.15 | 1.0 | 0.57 | 0.122 |
+
 **Intraday realised volatility, WTI (ADR 0009): QLIKE gain over the headline (> 0: better), Holm p over 9 tests, one-sided p that the candidate is worse, SPA p per cell, and two controls outside the family (the headline on the candidates' shorter training sample, and I2 against the range model R3)**
 
 | cell | I1 gain % | I1 Holm p | I1 p worse | I2 gain % | I2 Holm p | I2 p worse | I3 gain % | I3 Holm p | I3 p worse | SPA p (cell) | H-short gain vs headline % | I2 gain vs R3 % |
