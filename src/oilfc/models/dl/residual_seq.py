@@ -9,6 +9,8 @@ import numpy as np
 import torch
 from torch import nn
 
+from oilfc.models.dl.encoders import ARCHITECTURES, build_encoder
+
 
 class _PatchTransformer(nn.Module):
     """Patches of consecutive days -> linear embedding + learned positions -> encoder -> mean pool."""
@@ -74,7 +76,7 @@ class _FlatMLP(nn.Module):
 class SeqResidualRegressor:
     """Ensemble over seeds of a small sequence net trained with early stopping.
 
-    arch: "transformer", "mlp" or "gru". Inputs are standardised per channel and the target by its
+    arch: "transformer", "mlp", "gru" or one of encoders.ARCHITECTURES (settings in arch_kwargs). Inputs are standardised per channel and the target by its
     standard deviation, using the training rows only. The last `val_fraction` of the training rows
     (they are in time order) is held out for early stopping. predict() averages the seeds.
 
@@ -89,11 +91,12 @@ class SeqResidualRegressor:
         self, arch="transformer", seq_len=64, n_channels=6, d_model=32, n_heads=4, n_layers=2,
         patch_len=8, mlp_hidden=64, dropout=0.1, epochs=80, lr=3e-3, weight_decay=1e-2,
         batch_size=256, patience=15, seeds=(0, 1, 2), device="cpu", val_fraction=0.15,
-        loss="mse", bound=0.5, gru_hidden=32,
+        loss="mse", bound=0.5, gru_hidden=32, arch_kwargs=None,
     ):  # fmt: skip
         if loss not in ("mse", "qlike"):
             raise ValueError(f"unknown loss {loss!r}")
         self.loss, self.bound, self.gru_hidden = loss, bound, gru_hidden
+        self.arch_kwargs = dict(arch_kwargs or {})  # width, depth, heads, kernel (encoders.py)
         self.arch, self.seq_len, self.n_channels = arch, seq_len, n_channels
         self.d_model, self.n_heads, self.n_layers, self.patch_len = (
             d_model,
@@ -116,6 +119,10 @@ class SeqResidualRegressor:
             return _FlatMLP(self.seq_len, self.n_channels, self.mlp_hidden, self.dropout)
         if self.arch == "gru":
             return _GRU(self.n_channels, self.gru_hidden, self.dropout)
+        if self.arch in ARCHITECTURES:
+            return build_encoder(
+                self.arch, self.seq_len, self.n_channels, dropout=self.dropout, **self.arch_kwargs
+            )
         raise ValueError(f"unknown arch {self.arch!r}")
 
     def n_parameters(self) -> int:

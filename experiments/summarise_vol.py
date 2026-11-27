@@ -355,9 +355,12 @@ def refit_summary() -> str:
     return title + nl + nl + md(pd.DataFrame(cols)) + nl
 
 
-def dl_addendum_summary() -> str:
-    """Pre-registered deep-learning addendum (ADR 0004): variants against the headline benchmark."""
-    f = T / "dl_addendum.csv"
+def dl_addendum_summary(
+    name: str = "dl_addendum.csv",
+    label: str = "Deep-learning addendum",
+) -> str:
+    """Pre-registered deep-learning studies (ADR 0004, 0007): variants against the headline benchmark."""
+    f = T / name
     if not f.exists():
         return ""
     nl = chr(10)
@@ -369,7 +372,7 @@ def dl_addendum_summary() -> str:
         cols[f"{v} gain %"] = x["gain_pct"].round(2)
         cols[f"{v} Holm p"] = x["dm_p_holm"].round(3)
     spa = d.groupby("cell")["spa_p_cell"].first().round(3).rename("SPA p (cell)")
-    title = "**Deep-learning addendum: QLIKE gain over the headline benchmark (> 0: better), Holm p over 36 tests, SPA p per cell**"
+    title = f"**{label}: QLIKE gain over the headline benchmark (> 0: better), Holm p over 36 tests, SPA p per cell**"
     return title + nl + nl + md(pd.DataFrame(cols).join(spa)) + nl
 
 
@@ -467,10 +470,11 @@ def main():
     parts.append(window_summary())
     parts.append(refit_summary())
     parts.append(dl_addendum_summary())
+    parts.append(dl_addendum_summary("dl_arch.csv", "Tuned architectures (ADR 0007)"))
     parts.append(improve_summary())
     parts.append(range_summary())
     parts.append(combine_summary())
-    (T / "SUMMARY.md").write_text("\n".join(parts), encoding="utf-8")
+    (T / "SUMMARY.md").write_text("\n".join(x for x in parts if x), encoding="utf-8")
     print("wrote", T / "SUMMARY.md")
 
 

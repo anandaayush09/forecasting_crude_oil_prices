@@ -44,3 +44,17 @@ def expanding_splits(
             end = test[0] - h
             splits.append((np.arange(0 if window is None else max(0, end - window), end), test))
         k += 1
+
+
+def assert_targets_before(
+    index: pd.DatetimeIndex, train: np.ndarray, h: int, first_test: pd.Timestamp
+) -> None:
+    """Fail unless every training target is realised before `first_test`.
+
+    A training origin at position i has a target that ends at the return dated `index[i + h]`.
+    Used for tuning, which must only see data from before the first test origin.
+    """
+    if len(train) and index[int(train[-1]) + h] >= first_test:
+        raise AssertionError(
+            f"a training target ends on {index[int(train[-1]) + h].date()}, on or after {first_test.date()}"
+        )

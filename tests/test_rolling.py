@@ -110,3 +110,15 @@ def test_nonpositive_block_or_window_sizes_are_rejected_instead_of_looping_forev
 
     with pytest.raises(ValueError, match="at least 1"):
         expanding_splits(INDEX, pd.Timestamp("2010-01-01"), 5, **kwargs)
+
+
+def test_the_tuning_guard_accepts_the_first_split_and_rejects_a_later_one():
+    from oilfc.eval.rolling import assert_targets_before, expanding_splits
+
+    start = pd.Timestamp("2010-01-01")
+    splits = expanding_splits(INDEX, start, 22, 1)
+    assert_targets_before(INDEX, splits[0][0], 22, start)
+    with pytest.raises(AssertionError):
+        assert_targets_before(INDEX, splits[1][0], 22, start)
+    with pytest.raises(AssertionError):  # one row too many: the last target reaches the test block
+        assert_targets_before(INDEX, np.arange(splits[0][0][-1] + 2), 22, start)
