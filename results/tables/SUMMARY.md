@@ -592,3 +592,14 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 5d | -2.07 | 1.0 | 0.263 | 1.29 | 1.0 | 0.725 | 1.27 | 1.0 | 0.735 | 0.385 | -2.49 | 0.27 |
 | WTI 22d | 0.41 | 1.0 | 0.522 | 3.17 | 1.0 | 0.75 | 2.77 | 1.0 | 0.743 | 0.324 | -5.02 | -0.38 |
 | WTI 66d | -11.01 | 1.0 | 0.054 | -5.53 | 1.0 | 0.03 | -6.15 | 1.0 | 0.037 | 0.849 | -9.81 | -10.62 |
+
+**Clean holdout, run once (origins from 2025-07-01, data to 2026-11-17): QLIKE gain of the headline over each comparator (> 0: headline better), two-sided Diebold-Mariano p. smallest Holm p over 30 tests: 1.00**
+
+| cell | n | vs naive gain % | vs naive p (two-sided) | vs har_bc gain % | vs har_bc p (two-sided) | vs lhar_bc gain % | vs lhar_bc p (two-sided) | vs garch_t gain % | vs garch_t p (two-sided) | vs gjr_t gain % | vs gjr_t p (two-sided) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| BRENT 5d | 347 | 12.7 | 0.37 | 11.6 | 0.38 | 19.3 | 0.17 | 9.1 | 0.53 | 14.0 | 0.33 |
+| BRENT 22d | 330 | 17.5 | 0.61 | 6.8 | 0.87 | 16.8 | 0.7 | 1.6 | 0.97 | 7.4 | 0.86 |
+| BRENT 66d | 286 | 54.4 | 0.29 | 19.2 | 0.47 | 22.9 | 0.43 | 12.7 | 0.56 | 17.1 | 0.51 |
+| WTI 5d | 337 | 22.9 | 0.2 | 18.0 | 0.23 | 26.3 | 0.19 | 17.2 | 0.22 | 22.1 | 0.19 |
+| WTI 22d | 320 | 41.8 | 0.28 | 27.6 | 0.47 | 36.6 | 0.39 | 29.3 | 0.41 | 34.2 | 0.36 |
+| WTI 66d | 276 | 72.2 | 0.27 | 37.4 | 0.29 | 40.2 | 0.27 | 34.2 | 0.29 | 37.5 | 0.3 |

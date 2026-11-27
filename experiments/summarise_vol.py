@@ -430,6 +430,31 @@ def combine_summary() -> str:
     return title + nl + nl + md(pd.DataFrame(cols).join(spa)) + nl
 
 
+def holdout_summary() -> str:
+    """One-time clean holdout (records in results/holdout/): headline against the five comparators."""
+    f = ROOT / "results" / "holdout" / "holdout_v1.json"
+    if not f.exists():
+        return ""
+    import json
+
+    nl = chr(10)
+    rec = json.loads(f.read_text(encoding="utf-8"))["content"]
+    d = pd.DataFrame(rec["cells"])
+    d["cell"] = d["asset"].str.upper() + " " + d["horizon"].astype(str) + "d"
+    cols = {"n": d.groupby("cell")["n"].first().astype(int).astype(str)}
+    for c in rec["comparators"]:
+        x = d[d["comparator"] == c].set_index("cell")
+        cols[f"vs {c} gain %"] = x["gain_pct"].round(1)
+        cols[f"vs {c} p (two-sided)"] = x["dm_p"].round(2)
+    t = pd.DataFrame(cols).reindex([f"{a} {h}d" for a in ("BRENT", "WTI") for h in (5, 22, 66)])
+    title = (
+        f"**Clean holdout, run once (origins from {rec['holdout_start']}, data to {rec['data_end']}): "
+        f"QLIKE gain of the headline over each comparator (> 0: headline better), two-sided "
+        f"Diebold-Mariano p. smallest Holm p over {len(d)} tests: {d['dm_p_holm'].min():.2f}**"
+    )
+    return title + nl + nl + md(t) + nl
+
+
 def pooled_summary() -> str:
     """Stage B pooled nets (ADR 0004 amendment): against their per-asset versions and the headline."""
     f = T / "dl_pooled.csv"
@@ -522,6 +547,7 @@ def main():
     parts.append(combine_summary())
     parts.append(pooled_summary())
     parts.append(intraday_summary())
+    parts.append(holdout_summary())
     (T / "SUMMARY.md").write_text("\n".join(x for x in parts if x), encoding="utf-8")
     print("wrote", T / "SUMMARY.md")
 

@@ -112,7 +112,9 @@ def holdout_forecasts(
 
 def evaluate(df: pd.DataFrame, h: int, headline: str, comparators: list[str]) -> list[dict]:
     """QLIKE of the headline against each comparator: mean losses, gain (%) and one-sided
-    Diebold-Mariano p (Harvey correction, rectangular kernel) that the headline is better."""
+    two-sided Diebold-Mariano p (Harvey correction, rectangular kernel), as `dm_hln` returns it and as
+    the frozen protocol names the primary test. It is not one-sided: halve it for the one-sided p when
+    the headline has the lower mean loss."""
     q_head = qlike(df["y"], df[headline])
     rows = []
     for c in comparators:
