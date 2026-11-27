@@ -61,3 +61,43 @@ jobs:
           git commit -m "chore(live): forecasts and scores (automated run ${GITHUB_RUN_ID})"
           git pull --rebase origin main
           git push origin HEAD:main
+
+      # Foundation-model track (ADR 0010, protocol v2). It runs only after the primary forecasts are
+      # pushed, and every step below is allowed to fail without failing the job: a problem here must
+      # never touch the primary track. torch and granite-tsfm need their own environment.
+      - name: Check whether a foundation-model forecast is due
+        id: ttm_check
+        continue-on-error: true
+        run: PYTHONPATH=src python experiments/live_run_ttm.py --check
+
+      - name: Install the foundation-model environment
+        id: ttm_env
+        if: steps.ttm_check.outputs.needed == 'true'
+        continue-on-error: true
+        run: |
+          python -m venv .venv-ttm
+          .venv-ttm/bin/pip install -r requirements-ttm.txt --extra-index-url https://download.pytorch.org/whl/cpu
+
+      - name: Write foundation-model forecasts
+        if: steps.ttm_check.outputs.needed == 'true' && steps.ttm_env.outcome == 'success'
+        continue-on-error: true
+        run: .venv-ttm/bin/python experiments/live_run_ttm.py
+
+      - name: Verify and score the foundation-model forecasts
+        continue-on-error: true
+        run: PYTHONPATH=src python experiments/live_score_ttm.py --no-refresh
+
+      - name: Commit and push the foundation-model files
+        continue-on-error: true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add live/forecasts_ttm live/ttm_scores.csv live/TTM_SUMMARY.md
+          if git diff --cached --quiet; then
+            echo "No new foundation-model forecasts or scores."
+            exit 0
+          fi
+          git diff --cached --name-only
+          git commit -m "chore(live): foundation-model forecasts and scores (automated run ${GITHUB_RUN_ID})"
+          git pull --rebase origin main
+          git push origin HEAD:main

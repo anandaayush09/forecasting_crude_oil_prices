@@ -21,6 +21,7 @@ from oilfc.features.exog import exogenous_features, fx_features
 from oilfc.features.intraday_vol import intraday_vol_design
 from oilfc.features.pooled import POOL_CHANNELS, pooled_channels
 from oilfc.features.range_vol import range_vol_design
+from oilfc.features.ttm_input import ttm_input
 from oilfc.features.vol import CHANNELS, daily_channels, dl_channels, lag_window
 from oilfc.models.baselines.vol import ewma_vol, har_design, leverage_design, ovx_features
 
@@ -88,6 +89,8 @@ FEATURES = {
         pd.DataFrame({"rv5": (p["wti_fut1"] / 60) ** 2 * 3e-4, "rv5_ss": p["wti_fut1"] * 5e-6}),
         p.index,
     ),
+    "ttm_input_5": lambda p, r: ttm_input(r, 5).to_frame(),
+    "ttm_input_66": lambda p, r: ttm_input(r, 66).to_frame(),
     "daily_channels_lag1": lambda p, r: daily_channels(p, r, ovx_lag=1),
     "dl_channels": lambda p, r: dl_channels(p, r),
     "pooled_channels_with_iv": lambda p, r: pooled_channels(r, p["ovx"], p["vix"], "a", ["a", "b"]),

@@ -9,18 +9,15 @@ prices about a week late, so the run date is later than the origin and part of t
 already have happened when the forecast is made. The code never sees those later returns.
 """
 
-import csv
-import hashlib
-import json
-from datetime import UTC, datetime
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
 from oilfc.eval.targets import forward_realized_vol
+from oilfc.live.records import MANIFEST, verify_forecast, write_forecast
 from oilfc.models.baselines.garch import garch_forecast
 from oilfc.models.baselines.vol import forecast_log_linear, har_design, leverage_design
+
+__all__ = ["HORIZONS", "MANIFEST", "MODELS", "live_forecasts", "verify_forecast", "write_forecast"]
 
 SPEC_VERSION = "1"
 MODELS = ("naive", "har_bc", "lhar_bc", "lhar_ovx_bc_lag1", "garch_t", "gjr_t")
@@ -32,7 +29,6 @@ LOG_COLS = {
     "lhar_bc": HAR + LEV,
     "lhar_ovx_bc_lag1": HAR + LEV + ["log_ovx"],
 }
-MANIFEST = "MANIFEST.csv"
 
 
 def live_forecasts(
@@ -83,48 +79,3 @@ def live_forecasts(
         "code_version": code_version,
         "spec_version": SPEC_VERSION,
     }
-
-
-def _digest(content: dict) -> str:
-    canonical = json.dumps(content, sort_keys=True, separators=(",", ":"))
-    return hashlib.sha256(canonical.encode()).hexdigest()
-
-
-def write_forecast(rec: dict, out_dir: Path, run_utc: str | None = None) -> Path:
-    """Write the record once as {asset}_{origin}.json with its SHA-256 and add a manifest row.
-
-    Raises FileExistsError if a forecast for this asset and origin already exists: frozen forecasts are
-    never overwritten.
-    """
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    run_utc = run_utc or datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    content = {**rec, "run_utc": run_utc}
-    sha = _digest(content)
-    path = out_dir / f"{rec['asset']}_{rec['origin_date']}.json"
-    with open(path, "x", encoding="utf-8") as f:  # "x": fail if the file exists
-        f.write(json.dumps({"content": content, "sha256": sha}, indent=1, sort_keys=True) + "\n")
-    manifest = out_dir / MANIFEST
-    new = not manifest.exists()
-    with open(manifest, "a", encoding="utf-8", newline="") as f:
-        w = csv.writer(f, lineterminator="\n")
-        if new:
-            w.writerow(["asset", "origin_date", "run_utc", "sha256", "code_version"])
-        w.writerow([rec["asset"], rec["origin_date"], run_utc, sha, rec.get("code_version") or ""])
-    return path
-
-
-def verify_forecast(path: Path) -> bool:
-    """True if the file's content matches its stored hash and, when listed, the manifest hash."""
-    path = Path(path)
-    stored = json.loads(path.read_text(encoding="utf-8"))
-    sha = _digest(stored["content"])
-    if sha != stored["sha256"]:
-        return False
-    manifest = path.parent / MANIFEST
-    if manifest.exists():
-        m = pd.read_csv(manifest, dtype=str)
-        c = stored["content"]
-        hit = m[(m["asset"] == c["asset"]) & (m["origin_date"] == c["origin_date"])]
-        return len(hit) == 1 and hit["sha256"].iloc[0] == sha
-    return True
