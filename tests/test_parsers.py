@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from oilfc.data.eia import clean_eia_frame
 from oilfc.data.fred import parse_fred_csv
@@ -46,7 +47,25 @@ def test_parse_epu_daily_builds_dates_from_three_columns():
     assert s.index[0] == pd.Timestamp("1985-01-01") and s.iloc[0] == 103.83
 
 
-def test_eia_url_carries_the_frequency():
-    from oilfc.data.eia import EIA_XLS
+@pytest.mark.parametrize(
+    "key, freq, section, expected",
+    [
+        ("WCESTUS1", "w", None, "https://www.eia.gov/dnav/pet/hist_xls/WCESTUS1w.xls"),
+        ("RNGWHHD", "d", "ng", "https://www.eia.gov/dnav/ng/hist_xls/RNGWHHDd.xls"),
+    ],
+)
+def test_eia_url_carries_the_frequency_and_the_catalogue_section(
+    monkeypatch, key, freq, section, expected
+):
+    import oilfc.data.eia as eia
 
-    assert EIA_XLS.format(key="WCESTUS1", freq="w").endswith("/WCESTUS1w.xls")
+    seen = []
+
+    def fake_get(url, timeout):
+        seen.append(url)
+        raise RuntimeError("stop before any download")
+
+    monkeypatch.setattr(eia.requests, "get", fake_get)
+    with pytest.raises(RuntimeError):
+        eia.fetch_eia(key, freq) if section is None else eia.fetch_eia(key, freq, section=section)
+    assert seen == [expected]
