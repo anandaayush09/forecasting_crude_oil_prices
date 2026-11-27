@@ -9,7 +9,7 @@ questions:
   - {id: 6, split: test, q: "How many tests are in the Holm family for combining the headline with the range and OVX dynamics models?", expected: [docs/adr/0008-combining-the-headline-with-the-range-and-ovx-dynamics-models.md]}
   - {id: 7, split: dev, q: "Which series make up the pooled panel of Stage B?", expected: [docs/adr/0004-deep-learning-addendum.md]}
   - {id: 8, split: test, q: "How are live forecasts stored so that they cannot be rewritten?", expected: [live/README.md]}
-  - {id: 9, split: dev, q: "What OVX timing is used and why is it lagged by one day?", expected: [README.md, literature/notes/ovx_volatility_check_2026-11-23.md, configs/protocol.yaml]}
+  - {id: 9, split: dev, q: "What OVX timing is used and why is it lagged by one day?", expected: [README.md, configs/protocol.yaml]}
   - {id: 10, split: test, q: "Why is QLIKE the primary loss?", expected: [README.md, docs/adr/0003-protocol-v1-freeze.md]}
   - {id: 11, split: dev, q: "Which range-based volatility estimators were tested and did they help?", expected: [docs/adr/0006-range-based-volatility-inputs.md, README.md]}
   - {id: 12, split: test, q: "What is the success rule of the live forward test?", expected: [live/README.md, configs/protocol.yaml, docs/adr/0003-protocol-v1-freeze.md]}

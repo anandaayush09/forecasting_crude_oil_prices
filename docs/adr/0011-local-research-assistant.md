@@ -32,3 +32,7 @@ The project's record is spread over about 28,000 words in ten ADRs, a README, tw
 - The tool answers questions about what the documents say, which may be out of date. It cites the file so the reader can check.
 - A null on retrieval quality is an acceptable outcome and is reported. Better retrieval (embeddings) and generation are possible follow-ups, each needing its own note.
 - Departures from this note are recorded as dated amendments here.
+
+## Amendments
+
+- 2026-11-28, before any retriever existed: the expected files of gold question 9 no longer list `literature/notes/ovx_volatility_check_2026-11-23.md`, because a check of the labels showed that note does not describe the lag. No other label changed.
