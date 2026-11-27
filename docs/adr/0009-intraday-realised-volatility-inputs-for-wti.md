@@ -70,6 +70,26 @@ As in ADR 0005, 0006 and 0008, with a family of 9: 3 candidates times 3 cells (W
 - Raw VOLARE data is never committed. The experiment reads it from `data/raw/volare/`, and the tests use synthetic series only.
 - Departures from this note are recorded as dated amendments here.
 
+## Outcome (2026-11-27)
+
+No candidate improves the headline under the rule: all 9 Holm-adjusted p-values are 1.0, the SPA p per cell is between 0.32 and 0.85, and I2 and I3 are significantly worse than the headline at WTI 66 days (unadjusted one-sided p 0.030 and 0.037). The headline stays. The cells have 3,329, 3,312 and 3,268 origins (5, 22 and 66 days). The QLIKE gains over the headline are:
+
+| candidate | 5 days | 22 days | 66 days |
+|---|---|---|---|
+| I1 (headline plus realised volatility) | -2.1% | +0.4% | -11.0% |
+| I2 (realised volatility replaces return-based HAR terms) | +1.3% | +3.2% | -5.5% |
+| I3 (as I2, subsampled) | +1.3% | +2.8% | -6.1% |
+
+The smallest unadjusted one-sided p in favour of a candidate is 0.25 (I2, 22 days).
+
+Controls, outside the family and descriptive:
+
+- **Training sample.** The headline fitted on the candidates' own, shorter training rows (H-short) is 2.5%, 5.0% and 9.8% worse than the headline at 5, 22 and 66 days. The loss of about 2.5 years of early training data costs more than the realised-volatility input gives back, so the comparison with the headline is dominated by sample length, which is the limit stated above.
+- **Same sample.** Against H-short, I2 gains +3.7% (p 0.050), +7.8% (p 0.09) and +3.9% (p 0.24), and I3 gains +3.7% (p 0.043), +7.4% (p 0.09) and +3.3% (p 0.25). These raw p-values are not corrected for multiple tests and H-short is not the headline, so they are an indication that the input carries some information when the sample is equal, not a result.
+- **Range model.** I2 against R3 of ADR 0006 on common rows: +0.3% (p 0.44), -0.4% (p 0.55) and -10.6% (p 0.91, R3 better). Realised volatility from 5-minute returns adds nothing over the daily range at 5 and 22 days, and is clearly worse at 66 days.
+
+Results: `results/tables/intraday_candidates.csv`, `results/tables/intraday_controls.csv`.
+
 ## Amendments
 
 - 2026-11-27, before any model was run: the feature columns are named `log_irv_<w>` (from `rv5`) and `log_irvss_<w>` (from `rv5_ss`), not `log_rv_<w>` and `log_rvss_<w>` as written above, because `log_rv_<w>` is already the return-based HAR column of the headline. The windowing (5, 22 and 63 days, shifted one day, at least 80% of the days) is the code of ADR 0006, now shared in `windowed_log_vol`, and its output for the range features is unchanged. The runner checks the SHA-256 of the archive's CSV against the value above and stops if it differs. H-short sets the headline's inputs to missing on rows where the three `log_irv` terms are missing, so it trains and tests on the candidates' rows.

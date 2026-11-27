@@ -573,3 +573,11 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 5d | 0.8 | 0.833 | -0.38 | 1.0 | 0.34 | 1.0 | 0.039 |
 | WTI 22d | 2.2 | 0.833 | -0.14 | 1.0 | 1.48 | 1.0 | 0.062 |
 | WTI 66d | 2.45 | 1.0 | 0.05 | 1.0 | 1.73 | 1.0 | 0.153 |
+
+**Intraday realised volatility, WTI (ADR 0009): QLIKE gain over the headline (> 0: better), Holm p over 9 tests, one-sided p that the candidate is worse, SPA p per cell, and two controls outside the family (the headline on the candidates' shorter training sample, and I2 against the range model R3)**
+
+| cell | I1 gain % | I1 Holm p | I1 p worse | I2 gain % | I2 Holm p | I2 p worse | I3 gain % | I3 Holm p | I3 p worse | SPA p (cell) | H-short gain vs headline % | I2 gain vs R3 % |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| WTI 5d | -2.07 | 1.0 | 0.263 | 1.29 | 1.0 | 0.725 | 1.27 | 1.0 | 0.735 | 0.385 | -2.49 | 0.27 |
+| WTI 22d | 0.41 | 1.0 | 0.522 | 3.17 | 1.0 | 0.75 | 2.77 | 1.0 | 0.743 | 0.324 | -5.02 | -0.38 |
+| WTI 66d | -11.01 | 1.0 | 0.054 | -5.53 | 1.0 | 0.03 | -6.15 | 1.0 | 0.037 | 0.849 | -9.81 | -10.62 |
