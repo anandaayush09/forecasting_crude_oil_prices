@@ -21,3 +21,15 @@ questions:
   - {id: 18, split: test, q: "What did the QLIKE estimation and weighted least squares candidates show?", expected: [docs/adr/0005-improving-the-headline.md, README.md]}
   - {id: 19, split: dev, q: "Why does the foundation-model track combine TTM with the headline in log volatility?", expected: [docs/adr/0010-foundation-model-live-track-and-protocol-v2.md]}
   - {id: 20, split: test, q: "Where do the holdout start date and the freeze tag come from?", expected: [configs/protocol.yaml, docs/adr/0003-protocol-v1-freeze.md]}
+
+# Questions the documents cannot answer: the tool must refuse them (added with an ADR 0011 amendment,
+# before any retriever was run). dev may be used to set the refusal threshold, test is run once.
+unanswerable:
+  - {id: 101, split: dev, q: "What is the capital of Australia?"}
+  - {id: 102, split: dev, q: "How do I bake sourdough bread?"}
+  - {id: 103, split: dev, q: "Who won the football world cup in 2018?"}
+  - {id: 104, split: dev, q: "Which restaurant should I visit in Berlin?"}
+  - {id: 105, split: test, q: "What is the weather in Delhi tomorrow?"}
+  - {id: 106, split: test, q: "How do I change a flat tire on a bicycle?"}
+  - {id: 107, split: test, q: "Explain quantum entanglement in simple words."}
+  - {id: 108, split: test, q: "What is the best programming language for game development?"}

@@ -36,3 +36,4 @@ The project's record is spread over about 28,000 words in ten ADRs, a README, tw
 ## Amendments
 
 - 2026-11-28, before any retriever existed: the expected files of gold question 9 no longer list `literature/notes/ovx_volatility_check_2026-11-23.md`, because a check of the labels showed that note does not describe the lag. No other label changed.
+- 2026-11-28, before any retriever was run: `docs/assistant_gold.yaml` gains 8 questions the documents cannot answer (4 development, 4 test), because the refusal threshold cannot be set without negative examples. Ranking quality is measured on the 20 answerable questions without the threshold, and the refusal rate is measured separately on the 8 unanswerable ones.
