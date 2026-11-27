@@ -54,3 +54,7 @@ A docstring of `evaluate()` in `src/oilfc/eval/holdout_final.py` called `dm_p` o
 
 - The final holdout script can be written and run once after the tag.
 - `tests/test_protocol_draft.py` now also checks that the live test models and horizons equal `oilfc.live.forecast.MODELS` and `HORIZONS`, so the file cannot drift from the code unseen.
+
+## Amendments
+
+- 2026-11-27: protocol v2 is proposed in ADR 0010 (`configs/protocol_v2.yaml`). It leaves v1 unchanged, including the primary live success rule, and adds one secondary live track for a foundation model. It takes effect only when ADR 0010 is accepted and the tag `protocol-v2-frozen` exists.

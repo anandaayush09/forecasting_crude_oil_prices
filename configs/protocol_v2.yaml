@@ -1,0 +1,44 @@
+# PROTOCOL v2, DRAFT 2026-11-27 (ADR 0010). Not frozen until Aayush accepts ADR 0010 and the tag
+# `protocol-v2-frozen` is created.
+#
+# v2 changes nothing in v1 (configs/protocol.yaml, tag `protocol-frozen`). It adds one secondary live
+# track. The primary live success rule, the headline, the holdout and the development protocol stay as
+# in v1. v1 is identified by the SHA-256 of its text with LF line endings, so a later edit to v1 is
+# caught by tests/test_protocol_v2.py.
+
+version: 2
+revised: 2026-11-27
+extends:
+  file: protocol.yaml
+  tag: protocol-frozen
+  sha256_lf: e670eb5ab5b31464de0c941c873e019a20ab74b1067c37227825abc92de44740
+unchanged: [volatility, risk, design, clean_holdout_start, holdout_rule, inference, live_test]
+
+foundation_track:
+  status: secondary                 # never replaces or changes the primary live claim
+  model:
+    name: TTM r2.1                  # Tiny Time Mixers, IBM Granite
+    repo: ibm-granite/granite-timeseries-ttm-r2
+    branch: 512-96-ft-r2.1          # context 512, prediction 96, frequency prefix tuning, MSE pretraining
+    revision: 3442406f106122f414a11f72b4ebfe4878bec89d   # commit of that branch, committed 2025-02-26
+    licence: Apache-2.0
+    mode: zero_shot                 # no fitting, no fine-tuning, no variance correction
+  input:
+    # one series per horizon h: annualised log realised volatility over the last h returns, no OVX
+    series: "0.5 * log(252 * mean(r^2 over the last h daily log returns))"
+    context: 512                    # the last 512 values, the last one dated at the origin
+    forecast: "exp(model output at step h)"   # annualised volatility, decimal, the target's own unit
+    prices_through: origin          # same information timing as the primary track
+  models: [ttm, ttm_headline_mean]
+  combination: "ttm_headline_mean = exp(0.5 * log(ttm) + 0.5 * log(lhar_ovx_bc_lag1)), equal weights"
+  horizons: [5, 22, 66]
+  assets: [brent, wti]
+  files: live/forecasts_ttm/        # separate folder, same write-once record and manifest procedure
+  first_origin: after_tag           # origins dated before the v2 tag are never part of the claim
+  backtest: not_evidence            # the weights postdate the development period
+  success: >
+    At least 60 scored origins per horizon. The equal-weight combination has a lower mean QLIKE than
+    the headline alone at 5 and 22 days on both assets, with a Diebold-Mariano p (dm_hln, rectangular
+    kernel, two-sided as in v1) below 0.05 after Holm adjustment over those 4 tests. TTM alone against
+    the headline, and the 66-day cells, are reported and are not part of the claim. A result against
+    this is reported as it comes.
