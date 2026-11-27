@@ -69,7 +69,7 @@ def lit_matrix_passages(csv_path: Path, path: str) -> list[Passage]:
     return out
 
 
-def load_passages(root: Path) -> list[Passage]:
+def load_passages(root: Path, max_words: int = MAX_WORDS) -> list[Passage]:
     """All passages of the allow-listed public files under `root`, in a fixed order."""
     root = Path(root)
     files = sorted({p for pat in INCLUDE for p in root.glob(pat) if p.is_file()})
@@ -77,7 +77,7 @@ def load_passages(root: Path) -> list[Passage]:
     for p in files:
         rel = p.relative_to(root)
         if _is_allowed(rel):
-            out += split_markdown(p.read_text(encoding="utf-8"), rel.as_posix())
+            out += split_markdown(p.read_text(encoding="utf-8"), rel.as_posix(), max_words)
     matrix = root / LIT_MATRIX
     if matrix.is_file():
         out += lit_matrix_passages(matrix, LIT_MATRIX)

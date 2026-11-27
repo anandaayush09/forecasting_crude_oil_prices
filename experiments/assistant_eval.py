@@ -54,7 +54,11 @@ def main():
     }  # fmt: skip
     pd.set_option("display.width", 200)
     print(d.round(3).to_string(index=False))
-    print(pd.Series(out).round(3).to_string())
+    print(
+        pd.Series(
+            {k: (round(v, 3) if isinstance(v, float) else v) for k, v in out.items()}
+        ).to_string()
+    )
     table = ROOT / "results" / "tables" / f"assistant_retrieval_{split}.csv"
     pd.DataFrame([out]).to_csv(table, index=False)
     print("wrote", table)
