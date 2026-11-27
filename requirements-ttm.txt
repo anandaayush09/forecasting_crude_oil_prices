@@ -1,0 +1,8 @@
+# Foundation-model live track (ADR 0010): its own environment, not the main requirements.
+# granite-tsfm needs torch<2.12 and scikit-learn<1.8, the main requirements pin newer ones.
+# Install torch from the CPU index: pip install -r requirements-ttm.txt --extra-index-url https://download.pytorch.org/whl/cpu
+granite-tsfm==0.3.12
+torch==2.11.0
+numpy<2.5
+pandas>=2.3.3,<3
+pyarrow>=21,<26
