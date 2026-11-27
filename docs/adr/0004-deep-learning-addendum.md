@@ -49,3 +49,28 @@ TTM r2.1 (IBM Granite, Apache-2.0, weights of 2025-01-31, pinned by Hugging Face
 ## Amendments
 
 - 2026-11-25, after the Stage A run: `dm_hln` returns two-sided p-values, and the per-cell summary files written by the Kaggle runs (`dl_addendum_<asset>_<h>d.csv`) therefore carry two-sided values in `dm_p_better`. The registered one-sided p-values (halved when the model is better, one minus half otherwise) are computed by `experiments/dl_addendum_report.py` from the per-origin predictions and are the ones in `results/tables/dl_addendum.csv`. The runner now writes one-sided values too. No registered choice changed.
+- 2026-11-27, before any Stage B run: series list and design of Stage B, as required by the Stage B section. Nothing here changes Stage A. The ADR 0007 result (no architecture helps) is known and does not alter this design.
+
+  **Series (8).** Evaluated: Brent (`RBRTE`) and WTI (`RWTC`) from EIA, as in the rest of the study. Companions, used only as training rows, all free: NY Harbor ultra-low-sulfur diesel (EIA `EER_EPD2DXL0_PF4_Y35NY_DPG`), NY Harbor conventional gasoline (`EER_EPMRU_PF4_Y35NY_DPG`), US Gulf Coast kerosene-type jet fuel (`EER_EPJK_PF4_RGC_DPG`), Mont Belvieu propane (`EER_EPLLPA_PF4_Y44MB_DPG`), Henry Hub natural gas (`RNGWHHD`, an EIA file under the `ng` path, not `pet`) and EUR per USD (FRED `DEXUSEU`). The yen and Canadian dollar rates were considered and left out: they have no free implied volatility index and are the weakest link to crude. With 8 series the list is inside the 8 to 10 of the Stage B section.
+
+  **Implied volatility.** Brent and WTI use OVX. EUR per USD uses the euro currency volatility index (FRED `EVZCLS`), which exists only from 2007-11-01 to 2025-03-11. Every other series has none. Where a series has no index on a date, its implied-volatility channel is set to zero and a 0/1 indicator channel marks it as missing, so the net can tell a missing input from a real zero. Implied-volatility channels are lagged one trading day, as in Stage A.
+
+  **Data checked on 2026-11-27**, for 2007-05-10 (the OVX start) to 2025-06-30. All series start before 2007-05-10, except EVZ. No value is zero or negative. The longest run of missing weekdays is 2 for every series except gasoline (3) and jet fuel (5, 2011-07-11 to 2011-07-15, which is at the limit of the 5 weekdays allowed and is kept).
+
+  | series | first date | last date used by the study |
+  |---|---|---|
+  | ULSD | 2006-06-14 | 2025-06-30 |
+  | gasoline | 1986-06-02 | 2025-06-30 |
+  | jet fuel | 1990-04-02 | 2025-06-30 |
+  | propane | 1992-07-09 | 2025-06-30 |
+  | Henry Hub | 1997-01-07 | 2025-06-30 |
+  | EUR per USD | 1999-01-04 | 2025-06-30 |
+  | EVZ | 2007-11-01 | 2025-03-11 |
+
+  **Conditions before the first run** (each is a code change with a test, committed before the run): the fetcher takes the EIA path so that Henry Hub can be read; release lags for the new series go into `configs/data.yaml` (spot prices lag 0 business days, the exchange rate 5 as for the broad dollar index); the pooled channel builder is added to the `FEATURES` registry in `tests/test_leakage.py` and passes; companion series are cut at the holdout with `oilfc.eval.holdout.development_only` like every other input. A series that fails these is dropped, not replaced, and the amendment is re-dated.
+
+  **Design.** The anchor of Brent and WTI is the headline `lhar_ovx_bc_lag1`, unchanged. Each companion gets the same leverage HAR with the QLIKE variance correction (expanding window, monthly refits), without the implied-volatility term where it has none. One shared net with a learned embedding per series, 22-day window, the Stage A settings (width 32, bounded zero-start QLIKE correction, last linear layer zero-initialised, alpha chosen on the last 20% of each training window, 5 seeds averaged in correction space, refit every 12 monthly splits). No new tuning, so any difference comes from pooling and not from settings. Inputs per day are the six channels of `features.vol.CHANNELS` computed for the series itself, plus the missing-indicator channel. At each monthly origin the net trains on all series with every training target ending before that origin. Test origins are Brent and WTI only, 2012-01 to 2025-06.
+
+  **Tests.** Variants (K = 2): pooled MLP and pooled transformer. Family: 2 variants times 6 cells (Brent and WTI at 5, 22 and 66 days) = 12 one-sided Diebold-Mariano tests (Harvey correction, rectangular kernel) of QLIKE against the Stage A per-asset version of the same architecture, Holm-adjusted together. Hansen's SPA (consistent p-value, block bootstrap with block length h, 1,000 repetitions, seed 0) is reported per cell over the 2 variants. A variant helps in a cell only if its Holm-adjusted p and the SPA p of that cell are both below 0.05. Outside the family, each pooled variant is also compared with the headline, with gain and one-sided p. Beating a per-asset net that itself did not beat the headline is not a gain over the benchmark, and the write-up says so.
+
+  **Stated limit.** 8 series is well below the roughly 40 where pooling has paid off in published work, and the companions share a volatility regime only loosely with crude. A null is the expected outcome. A positive cell would be labelled exploratory.
