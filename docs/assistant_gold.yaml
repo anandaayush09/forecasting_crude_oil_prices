@@ -1,0 +1,35 @@
+# Gold questions for the research assistant (ADR 0011), written before the retriever.
+# expected: any of these files contains the answer. split: dev (tuning allowed) or test (run once).
+questions:
+  - {id: 1, split: dev, q: "Which model is the headline and what inputs does it use?", expected: [README.md, docs/adr/0003-protocol-v1-freeze.md, configs/protocol.yaml]}
+  - {id: 2, split: test, q: "Why is the VOLARE intraday data used only for WTI?", expected: [docs/adr/0009-intraday-realised-volatility-inputs-for-wti.md]}
+  - {id: 3, split: dev, q: "Which tuned deep-learning architectures were tested and what was the result?", expected: [docs/adr/0007-deep-learning-architectures-tuned.md, README.md]}
+  - {id: 4, split: test, q: "What was the result of the one-time clean holdout run?", expected: [docs/adr/0003-protocol-v1-freeze.md, README.md, results/tables/SUMMARY.md]}
+  - {id: 5, split: dev, q: "Which TTM model revision is pinned for the foundation-model track?", expected: [docs/adr/0010-foundation-model-live-track-and-protocol-v2.md, configs/protocol_v2.yaml]}
+  - {id: 6, split: test, q: "How many tests are in the Holm family for combining the headline with the range and OVX dynamics models?", expected: [docs/adr/0008-combining-the-headline-with-the-range-and-ovx-dynamics-models.md]}
+  - {id: 7, split: dev, q: "Which series make up the pooled panel of Stage B?", expected: [docs/adr/0004-deep-learning-addendum.md]}
+  - {id: 8, split: test, q: "How are live forecasts stored so that they cannot be rewritten?", expected: [live/README.md]}
+  - {id: 9, split: dev, q: "What OVX timing is used and why is it lagged by one day?", expected: [README.md, configs/protocol.yaml]}
+  - {id: 10, split: test, q: "Why is QLIKE the primary loss?", expected: [README.md, docs/adr/0003-protocol-v1-freeze.md]}
+  - {id: 11, split: dev, q: "Which range-based volatility estimators were tested and did they help?", expected: [docs/adr/0006-range-based-volatility-inputs.md, README.md]}
+  - {id: 12, split: test, q: "What is the success rule of the live forward test?", expected: [live/README.md, configs/protocol.yaml, docs/adr/0003-protocol-v1-freeze.md]}
+  - {id: 13, split: dev, q: "Which free data sources does the project use?", expected: [docs/FREE_RESOURCES.md, configs/data.yaml]}
+  - {id: 14, split: test, q: "Which paper introduced the HAR model of realised volatility?", expected: [literature/lit_matrix.csv]}
+  - {id: 15, split: dev, q: "Which paper argues that robust loss functions rank forecasts correctly with a noisy volatility proxy?", expected: [literature/lit_matrix.csv]}
+  - {id: 16, split: test, q: "What does the read-only API expose?", expected: [docs/api_spec.md]}
+  - {id: 17, split: dev, q: "How is the transformer residual experiment run on Kaggle?", expected: [docs/kaggle_transformer_residual.md]}
+  - {id: 18, split: test, q: "What did the QLIKE estimation and weighted least squares candidates show?", expected: [docs/adr/0005-improving-the-headline.md, README.md]}
+  - {id: 19, split: dev, q: "Why does the foundation-model track combine TTM with the headline in log volatility?", expected: [docs/adr/0010-foundation-model-live-track-and-protocol-v2.md]}
+  - {id: 20, split: test, q: "Where do the holdout start date and the freeze tag come from?", expected: [configs/protocol.yaml, docs/adr/0003-protocol-v1-freeze.md]}
+
+# Questions the documents cannot answer: the tool must refuse them (added with an ADR 0011 amendment,
+# before any retriever was run). dev may be used to set the refusal threshold, test is run once.
+unanswerable:
+  - {id: 101, split: dev, q: "What is the capital of Australia?"}
+  - {id: 102, split: dev, q: "How do I bake sourdough bread?"}
+  - {id: 103, split: dev, q: "Who won the football world cup in 2018?"}
+  - {id: 104, split: dev, q: "Which restaurant should I visit in Berlin?"}
+  - {id: 105, split: test, q: "What is the weather in Delhi tomorrow?"}
+  - {id: 106, split: test, q: "How do I change a flat tire on a bicycle?"}
+  - {id: 107, split: test, q: "Explain quantum entanglement in simple words."}
+  - {id: 108, split: test, q: "What is the best programming language for game development?"}

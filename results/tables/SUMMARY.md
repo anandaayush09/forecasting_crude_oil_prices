@@ -593,6 +593,13 @@ Sample A: no futures, test 2012-01 to 2025-06. Sample B: futures included, test 
 | WTI 22d | 0.41 | 1.0 | 0.522 | 3.17 | 1.0 | 0.75 | 2.77 | 1.0 | 0.743 | 0.324 | -5.02 | -0.38 |
 | WTI 66d | -11.01 | 1.0 | 0.054 | -5.53 | 1.0 | 0.03 | -6.15 | 1.0 | 0.037 | 0.849 | -9.81 | -10.62 |
 
+**Research assistant (ADR 0011): recall at 1, 3 and 5 and mean reciprocal rank on the gold questions, and the share of unanswerable questions refused**
+
+| split | n_answerable | recall_at_1 | recall_at_3 | recall_at_5 | mrr | n_unanswerable | refused_share_of_unanswerable |
+|---|---|---|---|---|---|---|---|
+| dev | 10.0 | 0.6 | 0.7 | 0.9 | 0.683 | 4.0 | 1.0 |
+| test | 10.0 | 0.5 | 0.8 | 0.9 | 0.658 | 4.0 | 0.5 |
+
 **Clean holdout, run once (origins from 2025-07-01, data to 2026-11-17): QLIKE gain of the headline over each comparator (> 0: headline better), two-sided Diebold-Mariano p. smallest Holm p over 30 tests: 1.00**
 
 | cell | n | vs naive gain % | vs naive p (two-sided) | vs har_bc gain % | vs har_bc p (two-sided) | vs lhar_bc gain % | vs lhar_bc p (two-sided) | vs garch_t gain % | vs garch_t p (two-sided) | vs gjr_t gain % | vs gjr_t p (two-sided) |
