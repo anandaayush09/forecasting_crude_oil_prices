@@ -18,6 +18,7 @@ import pytest
 
 from oilfc.eval.targets import past_realized_vol
 from oilfc.features.exog import exogenous_features, fx_features
+from oilfc.features.intraday_vol import intraday_vol_design
 from oilfc.features.pooled import POOL_CHANNELS, pooled_channels
 from oilfc.features.range_vol import range_vol_design
 from oilfc.features.vol import CHANNELS, daily_channels, dl_channels, lag_window
@@ -81,6 +82,10 @@ FEATURES = {
                 "close": p["wti_fut1"],
             }
         ),
+        p.index,
+    ),
+    "intraday_vol_design": lambda p, r: intraday_vol_design(
+        pd.DataFrame({"rv5": (p["wti_fut1"] / 60) ** 2 * 3e-4, "rv5_ss": p["wti_fut1"] * 5e-6}),
         p.index,
     ),
     "daily_channels_lag1": lambda p, r: daily_channels(p, r, ovx_lag=1),

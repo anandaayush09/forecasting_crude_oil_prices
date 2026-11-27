@@ -30,6 +30,21 @@ def daily_variance(ohlc: pd.DataFrame, kind: str) -> pd.Series:
     raise ValueError(f"unknown kind {kind!r}")
 
 
+def windowed_log_vol(var: pd.Series, index: pd.DatetimeIndex, tag: str) -> pd.DataFrame:
+    """Log annualised volatility over 5, 22 and 63 days from a daily variance series, known at `index`.
+
+    Columns log_<tag>_<w>. The value at origin t uses the days up to and including t - 1. Windows are
+    counted in rows of `index`; days absent from `var` are skipped and a window needs at least 80%
+    of its days.
+    """
+    var = var.reindex(index)
+    out = {}
+    for w in WINDOWS:
+        mean = var.rolling(w, min_periods=int(np.ceil(MIN_SHARE * w))).mean()
+        out[f"log_{tag}_{w}"] = 0.5 * np.log(252 * mean.where(mean > 0)).shift(1)
+    return pd.DataFrame(out)
+
+
 def range_vol_design(
     ohlc: pd.DataFrame, index: pd.DatetimeIndex, kind: str = "parkinson"
 ) -> pd.DataFrame:
@@ -40,9 +55,4 @@ def range_vol_design(
     with OVX). Windows are counted in rows of `index`; a window needs at least 80% of its days.
     """
     tag = "pk" if kind == "parkinson" else "gk"
-    var = daily_variance(ohlc, kind).reindex(index)
-    out = {}
-    for w in WINDOWS:
-        mean = var.rolling(w, min_periods=int(np.ceil(MIN_SHARE * w))).mean()
-        out[f"log_{tag}_{w}"] = 0.5 * np.log(252 * mean.where(mean > 0)).shift(1)
-    return pd.DataFrame(out)
+    return windowed_log_vol(daily_variance(ohlc, kind), index, tag)
