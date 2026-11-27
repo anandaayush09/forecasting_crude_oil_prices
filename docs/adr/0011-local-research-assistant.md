@@ -33,6 +33,19 @@ The project's record is spread over about 28,000 words in ten ADRs, a README, tw
 - A null on retrieval quality is an acceptable outcome and is reported. Better retrieval (embeddings) and generation are possible follow-ups, each needing its own note.
 - Departures from this note are recorded as dated amendments here.
 
+## Outcome (2026-11-28)
+
+The 10 test questions were run once with the settings fixed on the development questions (`results/tables/assistant_retrieval_test.csv`; the development run is in `assistant_retrieval_dev.csv`).
+
+| split | recall at 1 | recall at 3 | recall at 5 | mean reciprocal rank | unanswerable refused |
+|---|---|---|---|---|---|
+| development (10 answerable, 4 unanswerable) | 0.6 | 0.7 | 0.9 | 0.683 | 4 of 4 |
+| test (10 answerable, 4 unanswerable) | 0.5 | 0.8 | 0.9 | 0.658 | 2 of 4 |
+
+Ranking is usable: for 8 of 10 test questions a passage from a correct file is in the top 3, and the one clear miss (question 14, which paper introduced the HAR model) ranked a task card first. The refusal is not reliable: at the threshold of 0.10 the tool refused 2 of the 4 off-topic test questions and answered the other two (scores 0.104 and 0.117, the second matching this ADR). The threshold was set from a margin of 0.089 to 0.109 on the development questions, which was too thin to carry over. No further tuning was done on the test questions. The documents themselves grew after the run (this outcome, a README line and a summary section), so a rerun would index slightly different text. With 10 questions per split these numbers are wide estimates and say that the tool is usable for finding the right file, not how good it is.
+
+Consequences: the tool is for locating where something is written, with the citation to check. Its refusal should not be trusted as proof that the documents lack an answer. Better refusal needs a larger negative set and a change of method (for example embeddings with a calibrated threshold), which would be a new note.
+
 ## Amendments
 
 - 2026-11-28, before any retriever existed: the expected files of gold question 9 no longer list `literature/notes/ovx_volatility_check_2026-11-23.md`, because a check of the labels showed that note does not describe the lag. No other label changed.

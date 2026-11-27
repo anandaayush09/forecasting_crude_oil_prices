@@ -22,6 +22,7 @@ def main():
     ap.add_argument("question")
     ap.add_argument("-k", type=int, default=3, help="number of passages (default 3)")
     args = ap.parse_args()
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # documents hold non-ASCII symbols
     hits = search(args.question, args.k)
     if not hits:
         print("The documents do not contain an answer to this question.")

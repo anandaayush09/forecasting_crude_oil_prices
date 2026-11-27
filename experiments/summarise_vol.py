@@ -455,6 +455,19 @@ def holdout_summary() -> str:
     return title + nl + nl + md(t) + nl
 
 
+def assistant_summary() -> str:
+    """Research assistant (ADR 0011): retrieval quality on the gold questions, development and test."""
+    files = [T / f"assistant_retrieval_{s}.csv" for s in ("dev", "test")]
+    if not all(f.exists() for f in files):
+        return ""
+    nl = chr(10)
+    d = pd.concat([pd.read_csv(f) for f in files]).set_index("split").round(3)
+    cols = ["n_answerable", "recall_at_1", "recall_at_3", "recall_at_5", "mrr"]
+    cols += ["n_unanswerable", "refused_share_of_unanswerable"]
+    title = "**Research assistant (ADR 0011): recall at 1, 3 and 5 and mean reciprocal rank on the gold questions, and the share of unanswerable questions refused**"
+    return title + nl + nl + md(d[cols]) + nl
+
+
 def pooled_summary() -> str:
     """Stage B pooled nets (ADR 0004 amendment): against their per-asset versions and the headline."""
     f = T / "dl_pooled.csv"
@@ -547,6 +560,7 @@ def main():
     parts.append(combine_summary())
     parts.append(pooled_summary())
     parts.append(intraday_summary())
+    parts.append(assistant_summary())
     parts.append(holdout_summary())
     (T / "SUMMARY.md").write_text("\n".join(x for x in parts if x), encoding="utf-8")
     print("wrote", T / "SUMMARY.md")
